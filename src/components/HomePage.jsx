@@ -9,6 +9,7 @@ import {
   FileText,
   Map,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const HomePage = () => {
   const { dashboardData, initialize } = useRiskStore();
@@ -66,12 +67,12 @@ const HomePage = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <a
-                href="/analytics"
+              <Link
+                to="/analytics"
                 className="bg-primary hover:bg-blue-700 text-white px-8 py-3.5 rounded-lg font-bold transition-all shadow-lg hover:shadow-primary/30 flex items-center justify-center gap-2"
               >
                 استكشاف السيناريوهات
-              </a>
+              </Link>
               <button className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white px-8 py-3.5 rounded-lg font-bold transition-all flex items-center justify-center gap-2">
                 <FileText className="w-5 h-5" />
                 قراءة التقرير الكامل
@@ -254,12 +255,12 @@ const HomePage = () => {
                 استكشف الخرائط التفاعلية مع كثافة السكان والبنية التحتية الحيوية
                 لتحديد المناطق عالية المخاطر في الإسكندرية.
               </p>
-              <a
-                href="/predictions"
+              <Link
+                to="/predictions"
                 className="bg-primary hover:bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl shadow-blue-900/20 transition-all transform hover:-translate-y-1"
               >
                 تشغيل الخريطة التفاعلية
-              </a>
+              </Link>
             </div>
           </div>
         </div>

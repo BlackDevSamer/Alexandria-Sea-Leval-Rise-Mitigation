@@ -1,5 +1,6 @@
 import React from "react";
 import { User } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Header = ({ active = "home" }) => {
   return (
@@ -16,8 +17,8 @@ const Header = ({ active = "home" }) => {
 
       {/* Center: Navigation Links */}
       <nav className="hidden md:flex items-center gap-8">
-        <a
-          href="/home"
+        <Link
+          to="/home"
           className={`text-sm font-medium ${
             active === "home"
               ? "text-primary border-b-2 border-primary pb-1 font-bold"
@@ -25,9 +26,9 @@ const Header = ({ active = "home" }) => {
           }`}
         >
           الرئيسية
-        </a>
-        <a
-          href="/predictions"
+        </Link>
+        <Link
+          to="/predictions"
           className={`text-sm font-medium ${
             active === "predictions"
               ? "text-primary border-b-2 border-primary pb-1 font-bold"
@@ -35,9 +36,9 @@ const Header = ({ active = "home" }) => {
           }`}
         >
           التنبؤات
-        </a>
-        <a
-          href="/analytics"
+        </Link>
+        <Link
+          to="/analytics"
           className={`text-sm font-medium ${
             active === "analytics"
               ? "text-primary border-b-2 border-primary pb-1 font-bold"
@@ -45,9 +46,9 @@ const Header = ({ active = "home" }) => {
           }`}
         >
           التحليلات
-        </a>
-        <a
-          href="/reports"
+        </Link>
+        <Link
+          to="/reports"
           className={`text-sm font-medium ${
             active === "reports"
               ? "text-primary border-b-2 border-primary pb-1 font-bold"
@@ -55,7 +56,7 @@ const Header = ({ active = "home" }) => {
           }`}
         >
           التقارير
-        </a>
+        </Link>
       </nav>
 
       {/* Right: Ministry Logo & Title */}

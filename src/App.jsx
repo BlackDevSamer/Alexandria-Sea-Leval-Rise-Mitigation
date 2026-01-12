@@ -1,5 +1,5 @@
 import {
-  BrowserRouter as Router,
+  HashRouter as Router,
   Routes,
   Route,
   Navigate,
@@ -13,7 +13,7 @@ import { Dashboard } from "./components/Dashboard";
 
 function App() {
   return (
-    <Router basename={import.meta.env.BASE_URL}>
+    <Router>
       <div className="App">
         <Routes>
           <Route path="/" element={<LoginPage />} />
