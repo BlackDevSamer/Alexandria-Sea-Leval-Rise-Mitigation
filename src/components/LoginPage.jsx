@@ -117,7 +117,9 @@ const LoginPage = () => {
       <div
         className="hidden lg:flex lg:w-1/2 relative"
         style={{
-          backgroundImage: "url('../Photos/LoginPage.png')",
+          backgroundImage: `url('${
+            import.meta.env.BASE_URL
+          }Photos/LoginPage.png')`,
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center top",
           backgroundSize: "100%",
