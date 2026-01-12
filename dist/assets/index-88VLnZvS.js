@@ -53459,6 +53459,7 @@ const yX = _.forwardRef(gX),
   };
 function gQ() {
   return A.jsx(sR, {
+    basename: "/Alexandria-Sea-Leval-Rise-Mitigation/",
     children: A.jsx("div", {
       className: "App",
       children: A.jsxs(Iz, {
