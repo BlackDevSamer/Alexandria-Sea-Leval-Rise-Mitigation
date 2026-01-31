@@ -339,7 +339,11 @@ const InfrastructurePage = () => {
             </h3>
             <div className="flex items-end gap-2 mb-1">
               <span className="text-3xl font-extrabold text-gray-900">
-                {filteredFacilities.length}
+                {isLoading ? (
+                  <div className="h-8 w-12 bg-gray-200 rounded animate-pulse"></div>
+                ) : (
+                  filteredFacilities.length
+                )}
               </span>
               <span className="text-sm font-bold text-gray-600 mb-1">
                 منشأة حيوية
