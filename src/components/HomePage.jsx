@@ -75,7 +75,7 @@ const HomePage = () => {
             <div className="flex flex-col">
               <span className="text-3xl font-extrabold text-gray-900 tracking-tight">
                 {/* BACKEND: Bind to real SLR projection */}
-                --
+                <div className="h-9 w-24 bg-gray-100 rounded-lg animate-pulse mb-1"></div>
               </span>
               <span className="text-xs text-slate-500 mt-1">
                 IPCC SSP5-8.5 خط الأساس
@@ -93,9 +93,11 @@ const HomePage = () => {
             </div>
             <div className="flex flex-col">
               <span className="text-3xl font-extrabold text-gray-900 tracking-tight">
-                {dashboardData?.populationAtRisk
-                  ? (dashboardData.populationAtRisk / 1000000).toFixed(1) + "M"
-                  : "--"}
+                {dashboardData?.populationAtRisk ? (
+                  (dashboardData.populationAtRisk / 1000000).toFixed(1) + "M"
+                ) : (
+                  <div className="h-9 w-32 bg-gray-100 rounded-lg animate-pulse mb-1"></div>
+                )}
               </span>
               <span className="text-xs text-red-600 mt-1 font-semibold">
                 -- زيادة متوقعة
@@ -112,10 +114,10 @@ const HomePage = () => {
               <Layers className="w-5 h-5 text-blue-600 group-hover:scale-110 transition-transform" />
             </div>
             <div className="flex flex-col">
-              <span className="text-3xl font-extrabold text-gray-900 tracking-tight">
+              <div className="text-3xl font-extrabold text-gray-900 tracking-tight">
                 {/* BACKEND: Bind to risk coverage % */}
-                --
-              </span>
+                <div className="h-9 w-20 bg-gray-100 rounded-lg animate-pulse mb-1"></div>
+              </div>
               <span className="text-xs text-slate-500 mt-1">
                 تغطية المناطق الإدارية
               </span>
@@ -135,7 +137,9 @@ const HomePage = () => {
             </div>
             <div className="flex flex-col">
               <span className="text-3xl font-extrabold text-gray-900 tracking-tight">
-                {dashboardData?.highRiskAreas?.[0] || "--"}
+                {dashboardData?.highRiskAreas?.[0] || (
+                  <div className="h-9 w-40 bg-gray-100 rounded-lg animate-pulse mb-1"></div>
+                )}
               </span>
               <span className="text-xs text-red-600 mt-1 font-semibold underline underline-offset-4 cursor-pointer">
                 إجراء مطلوب
