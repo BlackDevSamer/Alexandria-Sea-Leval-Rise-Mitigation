@@ -5,6 +5,8 @@ import {
   Popup,
   Tooltip,
   ZoomControl,
+  LayersControl,
+  LayerGroup,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useRiskStore } from "../store/riskStore";
@@ -87,7 +89,7 @@ export const RiskMap = ({ className }: { className?: string }) => {
 
     // Find risk for this district
     const districtRisk = populationData.qisms?.find(
-      (q) => q.name === districtName
+      (q) => q.name === districtName,
     );
 
     // If specific risk data exists for district
@@ -122,7 +124,7 @@ export const RiskMap = ({ className }: { className?: string }) => {
     <div
       className={twMerge(
         "h-[500px] w-full bg-gray-100 rounded-xl overflow-hidden shadow-lg border border-gray-200 relative z-0",
-        className
+        className,
       )}
     >
       {isLoading && (
@@ -141,59 +143,75 @@ export const RiskMap = ({ className }: { className?: string }) => {
         zoomControl={false}
       >
         <ZoomControl position="bottomleft" />
-        <TileLayer
-          attribution='&copy; <a href="https://www.google.com/maps">Google Maps</a>'
-          url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
-        />
 
-        {DISTRICTS.map((district) => (
-          <Polygon
-            key={district.name}
-            positions={district.position}
-            pathOptions={{
-              color: getDistrictColor(district.name),
-              fillColor: getDistrictColor(district.name),
-              fillOpacity: 0.6,
-              weight: 2,
-            }}
-          >
-            <div dir="rtl">
-              <Tooltip sticky direction="top" className="font-arabic">
-                <div className="text-right p-2 font-sans">
-                  <span className="font-bold block text-lg">
-                    {district.name}
-                  </span>
-                  <span className="text-sm">اضغط للتفاصيل</span>
-                </div>
-              </Tooltip>
-              <Popup className="font-arabic">
-                <div className="text-right min-w-[150px]">
-                  <h3 className="font-bold text-gray-800 border-b pb-1 mb-2">
-                    {district.name}
-                  </h3>
-                  <div className="space-y-1 text-sm">
-                    <p>
-                      مستوى الخطر:{" "}
-                      <span
-                        className="font-bold"
-                        style={{ color: getDistrictColor(district.name) }}
-                      >
-                        {populationData?.qisms?.find(
-                          (q) => q.name === district.name
-                        )?.riskLevel || "بيانات غير متوفرة"}
-                      </span>
-                    </p>
+        <LayersControl position="topright">
+          <LayersControl.BaseLayer checked name="خريطة الطرق">
+            <TileLayer
+              attribution='&copy; <a href="https://www.google.com/maps">Google Maps</a>'
+              url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+            />
+          </LayersControl.BaseLayer>
+
+          <LayersControl.BaseLayer name="قمر صناعي">
+            <TileLayer
+              attribution='&copy; <a href="https://www.google.com/maps">Google Maps</a>'
+              url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+            />
+          </LayersControl.BaseLayer>
+
+          <LayersControl.Overlay checked name="مناطق الخطر">
+            <LayerGroup>
+              {DISTRICTS.map((district) => (
+                <Polygon
+                  key={district.name}
+                  positions={district.position}
+                  pathOptions={{
+                    color: getDistrictColor(district.name),
+                    fillColor: getDistrictColor(district.name),
+                    fillOpacity: 0.6,
+                    weight: 2,
+                  }}
+                >
+                  <div dir="rtl">
+                    <Tooltip sticky direction="top" className="font-arabic">
+                      <div className="text-right p-2 font-sans">
+                        <span className="font-bold block text-lg">
+                          {district.name}
+                        </span>
+                        <span className="text-sm">اضغط للتفاصيل</span>
+                      </div>
+                    </Tooltip>
+                    <Popup className="font-arabic">
+                      <div className="text-right min-w-[150px]">
+                        <h3 className="font-bold text-gray-800 border-b pb-1 mb-2">
+                          {district.name}
+                        </h3>
+                        <div className="space-y-1 text-sm">
+                          <p>
+                            مستوى الخطر:{" "}
+                            <span
+                              className="font-bold"
+                              style={{ color: getDistrictColor(district.name) }}
+                            >
+                              {populationData?.qisms?.find(
+                                (q) => q.name === district.name,
+                              )?.riskLevel || "بيانات غير متوفرة"}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    </Popup>
                   </div>
-                </div>
-              </Popup>
-            </div>
-          </Polygon>
-        ))}
+                </Polygon>
+              ))}
+            </LayerGroup>
+          </LayersControl.Overlay>
+        </LayersControl>
       </MapContainer>
 
       {/* Legend Override */}
       <div
-        className="absolute top-4 right-4 bg-white/95 backdrop-blur p-4 rounded-lg shadow-lg z-[400] text-right border border-gray-100"
+        className="absolute top-4 right-16 bg-white/95 backdrop-blur p-4 rounded-lg shadow-lg z-[400] text-right border border-gray-100"
         dir="rtl"
       >
         <h4 className="font-bold text-gray-700 text-sm mb-2">

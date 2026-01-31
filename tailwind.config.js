@@ -7,9 +7,7 @@ export default {
         sans: ["Cairo", "sans-serif"], // Professional Arabic font
       },
       colors: {
-        primary: {
-          DEFAULT: "#1a4e9e", // Adjust to match the Ministry blue
-        },
+        primary: "#1d4ed8",
       },
     },
   },
