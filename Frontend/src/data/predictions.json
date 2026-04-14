@@ -1,0 +1,484 @@
+{
+  "metadata": {
+    "city": "الإسكندرية",
+    "systemName": "نظام محاكاة مخاطر الغرق الذكي",
+    "version": "1.0.0-beta",
+    "note": "هذه البيانات لغرض العرض التجريبي للمشروع فقط ولا تمثل تنبؤات رسمية."
+  },
+  "scenarios": [
+    {
+      "code": "SSP126",
+      "description": "مسار الاستدامة (الأمثل) - انبعاثات منخفضة",
+      "emissionLevel": "منخفض"
+    },
+    {
+      "code": "SSP245",
+      "description": "المسار المتوسط - استمرار الأنماط الحالية",
+      "emissionLevel": "متوسط"
+    },
+    {
+      "code": "SSP370",
+      "description": "المسار الإقليمي - انبعاثات مرتفعة",
+      "emissionLevel": "مرتفع"
+    },
+    {
+      "code": "SSP585",
+      "description": "مسار الوقود الأحفوري (الأسوأ)",
+      "emissionLevel": "مرتفع جدًا"
+    }
+  ],
+  "dashboard": {
+    "SSP126": {
+      "2030": {
+        "populationAtRisk": 25000,
+        "floodedAreaKm2": 4.5,
+        "highRiskAreas": ["المكس", "الدخيلة"]
+      },
+      "2050": {
+        "populationAtRisk": 40000,
+        "floodedAreaKm2": 6.2,
+        "highRiskAreas": ["المكس", "الدخيلة"]
+      },
+      "2070": {
+        "populationAtRisk": 55000,
+        "floodedAreaKm2": 7.8,
+        "highRiskAreas": ["المكس", "الدخيلة", "الأنفوشي"]
+      },
+      "2100": {
+        "populationAtRisk": 70000,
+        "floodedAreaKm2": 9.5,
+        "highRiskAreas": ["المكس", "الدخيلة", "الأنفوشي"]
+      }
+    },
+    "SSP245": {
+      "2030": {
+        "populationAtRisk": 35000,
+        "floodedAreaKm2": 6.0,
+        "highRiskAreas": ["المكس", "الدخيلة"]
+      },
+      "2050": {
+        "populationAtRisk": 80000,
+        "floodedAreaKm2": 12.0,
+        "highRiskAreas": ["المكس", "الدخيلة", "الأنفوشي"]
+      },
+      "2070": {
+        "populationAtRisk": 150000,
+        "floodedAreaKm2": 18.5,
+        "highRiskAreas": ["المكس", "الدخيلة", "الأنفوشي", "أبو قير"]
+      },
+      "2100": {
+        "populationAtRisk": 250000,
+        "floodedAreaKm2": 28.0,
+        "highRiskAreas": ["المكس", "الدخيلة", "الأنفوشي", "أبو قير"]
+      }
+    },
+    "SSP370": {
+      "2030": {
+        "populationAtRisk": 45000,
+        "floodedAreaKm2": 7.5,
+        "highRiskAreas": ["المكس", "الدخيلة"]
+      },
+      "2050": {
+        "populationAtRisk": 120000,
+        "floodedAreaKm2": 16.0,
+        "highRiskAreas": ["المكس", "الدخيلة", "الأنفوشي", "المنشية"]
+      },
+      "2070": {
+        "populationAtRisk": 300000,
+        "floodedAreaKm2": 32.0,
+        "highRiskAreas": ["المكس", "الدخيلة", "الأنفوشي", "المنشية", "أبو قير"]
+      },
+      "2100": {
+        "populationAtRisk": 600000,
+        "floodedAreaKm2": 55.0,
+        "highRiskAreas": ["معظم المناطق الساحلية"]
+      }
+    },
+    "SSP585": {
+      "2030": {
+        "populationAtRisk": 60000,
+        "floodedAreaKm2": 9.0,
+        "highRiskAreas": ["المكس", "الدخيلة", "الأنفوشي"]
+      },
+      "2050": {
+        "populationAtRisk": 250000,
+        "floodedAreaKm2": 25.0,
+        "highRiskAreas": ["المكس", "الدخيلة", "الأنفوشي", "المنشية"]
+      },
+      "2070": {
+        "populationAtRisk": 800000,
+        "floodedAreaKm2": 60.0,
+        "highRiskAreas": ["تهديد وجودي للمدينة القديمة"]
+      },
+      "2100": {
+        "populationAtRisk": 1500000,
+        "floodedAreaKm2": 120.0,
+        "highRiskAreas": ["كارثة شاملة - غرق مساحات شاسعة"]
+      }
+    }
+  },
+  "maps": {
+    "SSP126": {
+      "2030": {
+        "floodedAreaKm2": 4.5,
+        "riskLevel": "منخفض",
+        "colorCode": "#4CAF50",
+        "description": "تأثير محدود"
+      },
+      "2050": {
+        "floodedAreaKm2": 6.2,
+        "riskLevel": "منخفض",
+        "colorCode": "#4CAF50",
+        "description": "تأثير محدود"
+      },
+      "2070": {
+        "floodedAreaKm2": 7.8,
+        "riskLevel": "متوسط",
+        "colorCode": "#8BC34A",
+        "description": "ارتفاع طفيف"
+      },
+      "2100": {
+        "floodedAreaKm2": 9.5,
+        "riskLevel": "متوسط",
+        "colorCode": "#8BC34A",
+        "description": "تحكم جيد"
+      }
+    },
+    "SSP245": {
+      "2030": {
+        "floodedAreaKm2": 6.0,
+        "riskLevel": "منخفض",
+        "colorCode": "#8BC34A",
+        "description": "بداية الخطر"
+      },
+      "2050": {
+        "floodedAreaKm2": 12.0,
+        "riskLevel": "متوسط",
+        "colorCode": "#FFC107",
+        "description": "خطر متزايد"
+      },
+      "2070": {
+        "floodedAreaKm2": 18.5,
+        "riskLevel": "مرتفع",
+        "colorCode": "#FF9800",
+        "description": "تأكل الشواطئ"
+      },
+      "2100": {
+        "floodedAreaKm2": 28.0,
+        "riskLevel": "مرتفع",
+        "colorCode": "#FF9800",
+        "description": "تهديد للمناطق السكنية"
+      }
+    },
+    "SSP370": {
+      "2030": {
+        "floodedAreaKm2": 7.5,
+        "riskLevel": "متوسط",
+        "colorCode": "#FFC107",
+        "description": "خطر ملموس"
+      },
+      "2050": {
+        "floodedAreaKm2": 16.0,
+        "riskLevel": "مرتفع",
+        "colorCode": "#FF9800",
+        "description": "تهديد للبنية التحتية"
+      },
+      "2070": {
+        "floodedAreaKm2": 32.0,
+        "riskLevel": "مرتفع جدًا",
+        "colorCode": "#FF5722",
+        "description": "تغلغل المياه"
+      },
+      "2100": {
+        "floodedAreaKm2": 55.0,
+        "riskLevel": "شديد",
+        "colorCode": "#D32F2F",
+        "description": "غرق مناطق قديمة"
+      }
+    },
+    "SSP585": {
+      "2030": {
+        "floodedAreaKm2": 9.0,
+        "riskLevel": "متوسط",
+        "colorCode": "#FF9800",
+        "description": "تسارع التآكل"
+      },
+      "2050": {
+        "floodedAreaKm2": 25.0,
+        "riskLevel": "مرتفع",
+        "colorCode": "#FF5722",
+        "description": "فقدان شواطئ"
+      },
+      "2070": {
+        "floodedAreaKm2": 60.0,
+        "riskLevel": "شديد",
+        "colorCode": "#D32F2F",
+        "description": "غرق أحياء كاملة"
+      },
+      "2100": {
+        "floodedAreaKm2": 120.0,
+        "riskLevel": "كارثي",
+        "colorCode": "#B71C1C",
+        "description": "اختفاء معالم رئيسية"
+      }
+    }
+  },
+  "population": {
+    "SSP126": {
+      "2030": {
+        "totalPopulation": 5500000,
+        "exposedPopulation": 25000,
+        "informalSettlementsExposure": "منخفض",
+        "qisms": [
+          { "name": "الجمرك", "exposedPopulation": 5000, "riskLevel": "منخفض" }
+        ]
+      },
+      "2050": {
+        "totalPopulation": 6000000,
+        "exposedPopulation": 30000,
+        "informalSettlementsExposure": "منخفض",
+        "qisms": [
+          { "name": "الجمرك", "exposedPopulation": 6000, "riskLevel": "منخفض" }
+        ]
+      },
+      "2070": {
+        "totalPopulation": 6500000,
+        "exposedPopulation": 45000,
+        "informalSettlementsExposure": "متوسط",
+        "qisms": [
+          { "name": "الجمرك", "exposedPopulation": 10000, "riskLevel": "متوسط" }
+        ]
+      },
+      "2100": {
+        "totalPopulation": 7000000,
+        "exposedPopulation": 70000,
+        "informalSettlementsExposure": "متوسط",
+        "qisms": [
+          { "name": "الجمرك", "exposedPopulation": 15000, "riskLevel": "مرتفع" }
+        ]
+      }
+    },
+    "SSP245": {
+      "2030": {
+        "totalPopulation": 5500000,
+        "exposedPopulation": 35000,
+        "informalSettlementsExposure": "منخفض",
+        "qisms": [
+          { "name": "الجمرك", "exposedPopulation": 6000, "riskLevel": "متوسط" }
+        ]
+      },
+      "2050": {
+        "totalPopulation": 6200000,
+        "exposedPopulation": 80000,
+        "informalSettlementsExposure": "متوسط",
+        "qisms": [
+          { "name": "الجمرك", "exposedPopulation": 15000, "riskLevel": "مرتفع" }
+        ]
+      },
+      "2070": {
+        "totalPopulation": 6800000,
+        "exposedPopulation": 150000,
+        "informalSettlementsExposure": "مرتفع",
+        "qisms": [
+          { "name": "الجمرك", "exposedPopulation": 30000, "riskLevel": "مرتفع" }
+        ]
+      },
+      "2100": {
+        "totalPopulation": 7500000,
+        "exposedPopulation": 250000,
+        "informalSettlementsExposure": "مرتفع",
+        "qisms": [
+          { "name": "الجمرك", "exposedPopulation": 50000, "riskLevel": "شديد" }
+        ]
+      }
+    },
+    "SSP370": {
+      "2030": {
+        "totalPopulation": 5500000,
+        "exposedPopulation": 45000,
+        "informalSettlementsExposure": "متوسط",
+        "qisms": [
+          { "name": "الجمرك", "exposedPopulation": 8000, "riskLevel": "متوسط" }
+        ]
+      },
+      "2050": {
+        "totalPopulation": 6400000,
+        "exposedPopulation": 120000,
+        "informalSettlementsExposure": "مرتفع",
+        "qisms": [
+          { "name": "الجمرك", "exposedPopulation": 25000, "riskLevel": "مرتفع" }
+        ]
+      },
+      "2070": {
+        "totalPopulation": 7200000,
+        "exposedPopulation": 300000,
+        "informalSettlementsExposure": "شديد",
+        "qisms": [
+          { "name": "الجمرك", "exposedPopulation": 60000, "riskLevel": "شديد" }
+        ]
+      },
+      "2100": {
+        "totalPopulation": 8000000,
+        "exposedPopulation": 600000,
+        "informalSettlementsExposure": "شديد",
+        "qisms": [
+          {
+            "name": "الجمرك",
+            "exposedPopulation": 100000,
+            "riskLevel": "كارثي"
+          }
+        ]
+      }
+    },
+    "SSP585": {
+      "2030": {
+        "totalPopulation": 5500000,
+        "exposedPopulation": 60000,
+        "informalSettlementsExposure": "متوسط",
+        "qisms": [
+          { "name": "الجمرك", "exposedPopulation": 12000, "riskLevel": "مرتفع" }
+        ]
+      },
+      "2050": {
+        "totalPopulation": 6500000,
+        "exposedPopulation": 250000,
+        "informalSettlementsExposure": "شديد",
+        "qisms": [
+          { "name": "الجمرك", "exposedPopulation": 40000, "riskLevel": "شديد" }
+        ]
+      },
+      "2070": {
+        "totalPopulation": 7500000,
+        "exposedPopulation": 800000,
+        "informalSettlementsExposure": "كارثي",
+        "qisms": [
+          {
+            "name": "الجمرك",
+            "exposedPopulation": 120000,
+            "riskLevel": "كارثي"
+          }
+        ]
+      },
+      "2100": {
+        "totalPopulation": 8500000,
+        "exposedPopulation": 1500000,
+        "informalSettlementsExposure": "كارثي",
+        "qisms": [
+          {
+            "name": "الجمرك",
+            "exposedPopulation": 150000,
+            "riskLevel": "كارثي"
+          }
+        ]
+      }
+    }
+  },
+  "infrastructure": {
+    "SSP126": {
+      "2030": { "الموانئ": [], "المستشفيات": [] },
+      "2050": { "الموانئ": [], "المستشفيات": [] },
+      "2070": { "الموانئ": [], "المستشفيات": [] },
+      "2100": { "الموانئ": [], "المستشفيات": [] }
+    },
+    "SSP245": {
+      "2030": { "الموانئ": [], "المستشفيات": [] },
+      "2050": { "الموانئ": [], "المستشفيات": [] },
+      "2070": { "الموانئ": [], "المستشفيات": [] },
+      "2100": { "الموانئ": [], "المستشفيات": [] }
+    },
+    "SSP370": {
+      "2030": { "الموانئ": [], "المستشفيات": [] },
+      "2050": { "الموانئ": [], "المستشفيات": [] },
+      "2070": { "الموانئ": [], "المستشفيات": [] },
+      "2100": { "الموانئ": [], "المستشفيات": [] }
+    },
+    "SSP585": {
+      "2030": { "الموانئ": [], "المستشفيات": [] },
+      "2050": { "الموانئ": [], "المستشفيات": [] },
+      "2070": { "الموانئ": [], "المستشفيات": [] },
+      "2100": {
+        "الموانئ": [
+          {
+            "name": "ميناء الإسكندرية",
+            "qism": "الجمرك",
+            "riskLevel": "شديد",
+            "impactDescription": "غرق الأرصفة"
+          }
+        ],
+        "المستشفيات": [
+          {
+            "name": "مستشفى رأس التين",
+            "qism": "الجمرك",
+            "riskLevel": "شديد",
+            "impactDescription": "إخلاء كامل"
+          }
+        ]
+      }
+    }
+  },
+  "vulnerabilityIndex": {
+    "SSP126": { "2030": {}, "2050": {}, "2070": {}, "2100": {} },
+    "SSP245": { "2030": {}, "2050": {}, "2070": {}, "2100": {} },
+    "SSP370": { "2030": {}, "2050": {}, "2070": {}, "2100": {} },
+    "SSP585": {
+      "2030": {
+        "الجمرك": {
+          "floodScore": 0.4,
+          "exposureScore": 0.5,
+          "sensitivityScore": 0.5,
+          "finalRisk": 0.45,
+          "category": "متوسط"
+        }
+      },
+      "2050": {
+        "الجمرك": {
+          "floodScore": 0.6,
+          "exposureScore": 0.7,
+          "sensitivityScore": 0.6,
+          "finalRisk": 0.65,
+          "category": "مرتفع"
+        }
+      },
+      "2070": {
+        "الجمرك": {
+          "floodScore": 0.8,
+          "exposureScore": 0.8,
+          "sensitivityScore": 0.7,
+          "finalRisk": 0.8,
+          "category": "شديد"
+        }
+      },
+      "2100": {
+        "الجمرك": {
+          "floodScore": 0.95,
+          "exposureScore": 0.9,
+          "sensitivityScore": 0.8,
+          "finalRisk": 0.92,
+          "category": "كارثي"
+        }
+      }
+    }
+  },
+  "reports": {
+    "SSP126": {
+      "summary": "مستقبل مستقر.",
+      "keyFindings": [],
+      "recommendations": []
+    },
+    "SSP245": {
+      "summary": "مخاطر متوسطة.",
+      "keyFindings": [],
+      "recommendations": []
+    },
+    "SSP370": {
+      "summary": "مخاطر عالية.",
+      "keyFindings": [],
+      "recommendations": []
+    },
+    "SSP585": {
+      "summary": "كارثة وجودية.",
+      "keyFindings": ["غرق 30% من المدينة"],
+      "recommendations": ["تخطيط مدن بديلة"]
+    }
+  }
+}
