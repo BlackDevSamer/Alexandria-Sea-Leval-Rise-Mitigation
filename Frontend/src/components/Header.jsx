@@ -12,7 +12,7 @@ const Header = ({ active = "home" }) => {
 
   const handleLogout = () => {
     logout();
-    navigate("/login", { replace: true });
+    navigate("/register", { replace: true });
   };
 
   return (

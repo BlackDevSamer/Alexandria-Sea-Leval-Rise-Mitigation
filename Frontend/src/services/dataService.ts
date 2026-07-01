@@ -242,7 +242,7 @@ async function readErrorMessage(response: Response): Promise<string> {
 async function requestJson<T>(
   path: string,
   init: RequestInit = {},
-  requiresAuth = true,
+  requiresAuth = false,
 ): Promise<T> {
   const execute = async (token: string | null): Promise<Response> => {
     const headers = new Headers(init.headers || {});
@@ -341,7 +341,7 @@ function toRiskLabel(risk: "extreme" | "high" | "medium" | "low"): string {
   return "Low";
 }
 
-function toFloodDepth(risk: "extreme" | "high" | "medium" | "low"): string {
+export function toFloodDepth(risk: "extreme" | "high" | "medium" | "low"): string {
   if (risk === "extreme") return "1.50 m";
   if (risk === "high") return "1.10 m";
   if (risk === "medium") return "0.70 m";
@@ -354,7 +354,7 @@ function toStatus(risk: "extreme" | "high" | "medium" | "low"): "Critical" | "Wa
   return "Stable";
 }
 
-function getQismCoordinates(qism: string, index: number): { lat: number; lng: number } {
+export function getQismCoordinates(qism: string, index: number): { lat: number; lng: number } {
   const key = qism.trim().toLowerCase();
   const map: Record<string, { lat: number; lng: number }> = {
     "al gomrok": { lat: 31.206, lng: 29.884 },

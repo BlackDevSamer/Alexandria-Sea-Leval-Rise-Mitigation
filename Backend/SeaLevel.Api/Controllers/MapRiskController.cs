@@ -7,7 +7,7 @@ using SeaLevel.Application.Services.Interfaces;
 namespace SeaLevel.Api.Controllers;
 
 [ApiController]
-[Authorize]
+[AllowAnonymous]
 [Route("api/map-risk")]
 public class MapRiskController : ControllerBase
 {

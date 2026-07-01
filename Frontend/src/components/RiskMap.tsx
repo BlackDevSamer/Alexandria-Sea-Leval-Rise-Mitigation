@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -8,7 +8,6 @@ import {
   LayersControl,
   LayerGroup,
   CircleMarker,
-  Circle,
   Tooltip
 } from "react-leaflet";
 import { useRiskStore } from "../store/riskStore";
@@ -123,7 +122,7 @@ const isNameMatch = (left: string, right: string): boolean => {
   return left === right || left.includes(right) || right.includes(left);
 };
 
-const getDistrictCenter = (districtName: string): [number, number] => {
+export const getDistrictCenter = (districtName: string): [number, number] => {
   const d = DISTRICTS.find((x) => x.name === districtName);
   if (!d) return [31.2001, 29.9187];
   

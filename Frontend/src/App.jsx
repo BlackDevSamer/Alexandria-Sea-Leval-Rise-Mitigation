@@ -7,7 +7,6 @@ import {
 } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
-import { useAuth } from "./contexts/useAuth";
 
 // Lazy loading components for better performance
 const ReportsPage = lazy(() => import("./components/ReportsPage"));
@@ -17,8 +16,6 @@ const AnalyticsPage = lazy(() => import("./components/AnalyticsPage"));
 const InfrastructurePage = lazy(
   () => import("./components/InfrastructurePage"),
 );
-const LoginPage = lazy(() => import("./components/LoginPage"));
-const RegisterPage = lazy(() => import("./components/RegisterPage"));
 
 // Loading Component
 const PageLoader = () => (
@@ -30,110 +27,22 @@ const PageLoader = () => (
   </div>
 );
 
-const RootRedirect = () => {
-  const { isAuthenticated, isAuthReady } = useAuth();
-
-  if (!isAuthReady) {
-    return <PageLoader />;
-  }
-
-  return <Navigate to={isAuthenticated ? "/home" : "/login"} replace />;
-};
-
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, isAuthReady } = useAuth();
-
-  if (!isAuthReady) {
-    return <PageLoader />;
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return children;
-};
-
-const PublicOnlyRoute = ({ children }) => {
-  const { isAuthenticated, isAuthReady } = useAuth();
-
-  if (!isAuthReady) {
-    return <PageLoader />;
-  }
-
-  if (isAuthenticated) {
-    return <Navigate to="/home" replace />;
-  }
-
-  return children;
-};
-
 const AppRoutes = () => {
   return (
     <div className="App">
       <Suspense fallback={<PageLoader />}>
         <Routes>
-          <Route path="/" element={<RootRedirect />} />
+          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/login" element={<Navigate to="/home" replace />} />
+          <Route path="/register" element={<Navigate to="/home" replace />} />
 
-          <Route
-            path="/login"
-            element={
-              <PublicOnlyRoute>
-                <LoginPage />
-              </PublicOnlyRoute>
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              <PublicOnlyRoute>
-                <RegisterPage />
-              </PublicOnlyRoute>
-            }
-          />
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/infrastructure" element={<InfrastructurePage />} />
+          <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/predictions" element={<PredictionsPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
 
-          <Route
-            path="/home"
-            element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/infrastructure"
-            element={
-              <ProtectedRoute>
-                <InfrastructurePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/analytics"
-            element={
-              <ProtectedRoute>
-                <AnalyticsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/predictions"
-            element={
-              <ProtectedRoute>
-                <PredictionsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/reports"
-            element={
-              <ProtectedRoute>
-                <ReportsPage />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route path="*" element={<RootRedirect />} />
+          <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </Suspense>
     </div>

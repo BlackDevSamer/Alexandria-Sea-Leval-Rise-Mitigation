@@ -9,6 +9,7 @@ import {
   Circle,
   LayersControl,
   LayerGroup,
+  GeoJSON,
   useMap,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -27,6 +28,11 @@ import {
 import { dataService } from "../services/dataService";
 import { useToast } from "../contexts/useToast";
 import { useRiskStore } from "../store/riskStore";
+import {
+  getDistrictRiskLevel,
+  getFacilitiesInDistrict,
+  stripQismPrefix,
+} from "../utils/qismBoundaries";
 
 // Fix for default Leaflet marker icon
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -104,6 +110,41 @@ const FitFilteredFacilitiesBounds = ({ facilities }) => {
   return null;
 };
 
+const FacilityOverlayLayer = ({ facilities, visible, title }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!visible || !facilities || facilities.length === 0) {
+      return;
+    }
+
+    const group = L.layerGroup();
+
+    facilities.forEach((facility) => {
+      const marker = L.marker([facility.lat, facility.lng], {
+        icon: L.divIcon({
+          className: "custom-marker",
+          html: `<div style="background-color:${getRiskColor(normalizeRiskValue(facility.risk))};width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 4px 6px -1px rgba(0,0,0,0.2)"></div>`,
+          iconSize: [24, 24],
+          iconAnchor: [12, 24],
+          popupAnchor: [0, -24],
+        }),
+      });
+
+      marker.bindPopup(`<div dir="rtl"><strong>${facility.name}</strong><br/>${facility.typeLabel}<br/>${facility.qism}</div>`);
+      group.addLayer(marker);
+    });
+
+    group.addTo(map);
+
+    return () => {
+      group.remove();
+    };
+  }, [facilities, map, visible, title]);
+
+  return null;
+};
+
 const InfrastructurePage = () => {
   const { addToast } = useToast();
   const { selectedScenario, selectedYear } = useRiskStore();
@@ -123,7 +164,65 @@ const InfrastructurePage = () => {
   // State for facilities
   const [facilities, setFacilities] = useState([]);
   const [modelHighRiskAreas, setModelHighRiskAreas] = useState([]);
+  const [qismBoundaries, setQismBoundaries] = useState(null);
+  const [adminBoundaries, setAdminBoundaries] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [mapRenderVersion, setMapRenderVersion] = useState(0);
+  const [showFacilityIcons, setShowFacilityIcons] = useState(false);
+
+  useEffect(() => {
+    setShowFacilityIcons(false);
+  }, [selectedSectors, selectedRisks]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadBoundaryData = async () => {
+      try {
+        const [qismResponse, adminResponse] = await Promise.all([
+          fetch(`${import.meta.env.BASE_URL}data/alexandria_qisms.geojson`),
+          fetch(`${import.meta.env.BASE_URL}data/geo/egy_admin1.geojson`),
+        ]);
+
+        if (!qismResponse.ok) {
+          throw new Error(`Failed to load qism boundaries (${qismResponse.status})`);
+        }
+
+        if (!adminResponse.ok) {
+          throw new Error(`Failed to load admin boundaries (${adminResponse.status})`);
+        }
+
+        const qismData = await qismResponse.json();
+        const adminData = await adminResponse.json();
+
+        const alexandriaFeatures = (adminData?.features || []).filter((feature) => {
+          const properties = feature?.properties || {};
+          const name = `${properties.adm1_name || ""} ${properties.adm1_name1 || ""}`.trim();
+          return name.toLowerCase().includes("alexandria") || name.toLowerCase().includes("الاسكندرية");
+        });
+
+        if (isMounted) {
+          setQismBoundaries(qismData);
+          setAdminBoundaries({
+            ...adminData,
+            features: alexandriaFeatures,
+          });
+        }
+      } catch (error) {
+        console.error("Failed to load Alexandria boundary data", error);
+        if (isMounted) {
+          setQismBoundaries(null);
+          setAdminBoundaries(null);
+        }
+      }
+    };
+
+    loadBoundaryData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -224,14 +323,42 @@ const InfrastructurePage = () => {
   }, [facilities]);
 
   const filteredFacilities = useMemo(() => {
+    const selectedSectorSet = new Set(
+      selectedSectors.map((sector) => String(sector || "").trim().toLowerCase()),
+    );
+
     return facilities.filter((facility) => {
       const facilityRisk = normalizeRiskValue(facility.risk);
+      const facilitySector = String(facility.type || "")
+        .trim()
+        .toLowerCase();
+
       return (
-        selectedSectors.includes(facility.type) &&
+        selectedSectorSet.has(facilitySector) &&
         selectedRisks.includes(facilityRisk)
       );
     });
   }, [facilities, selectedSectors, selectedRisks]);
+
+  const facilitiesByType = useMemo(() => {
+    const grouped = {
+      ports: [],
+      hospitals: [],
+      transport: [],
+      utilities: [],
+    };
+
+    filteredFacilities.forEach((facility) => {
+      const type = String(facility.type || "").trim().toLowerCase();
+      if (type in grouped) {
+        grouped[type].push(facility);
+      } else {
+        grouped.utilities.push(facility);
+      }
+    });
+
+    return grouped;
+  }, [filteredFacilities]);
 
   const highImpactFacilities = useMemo(() => {
     return filteredFacilities.filter((facility) => {
@@ -311,6 +438,46 @@ const InfrastructurePage = () => {
 
     return totalDepth / filteredFacilities.length;
   }, [filteredFacilities]);
+
+  const filterStateKey = useMemo(() => {
+    return [
+      selectedScenario,
+      selectedYear,
+      selectedSectors.join(","),
+      selectedRisks.join(","),
+      filteredFacilities.map((facility) => `${facility.id}:${facility.risk}`).join("|"),
+      (modelHighRiskAreas || []).join("|"),
+    ].join("::");
+  }, [filteredFacilities, modelHighRiskAreas, selectedRisks, selectedScenario, selectedSectors, selectedYear]);
+
+  const shouldRenderFacilityIcons = showFacilityIcons && filteredFacilities.length > 0;
+
+  const qismBoundaryLayerKey = useMemo(() => {
+    return [
+      selectedScenario,
+      selectedYear,
+      filteredFacilities.map((facility) => `${facility.id}:${facility.risk}`).join("|"),
+      (modelHighRiskAreas || []).join("|"),
+    ].join("::");
+  }, [filteredFacilities, modelHighRiskAreas, selectedScenario, selectedYear]);
+
+  const getDistrictBoundaryStyle = (districtNameAr) => {
+    const risk = getDistrictRiskLevel(
+      districtNameAr,
+      filteredFacilities,
+      modelHighRiskAreas,
+      normalizeRiskValue,
+      getRiskPriority,
+    );
+    const color = risk ? getRiskColor(risk) : "#94a3b8";
+
+    return {
+      color,
+      weight: risk ? 2 : 1,
+      fillColor: color,
+      fillOpacity: risk ? 0.2 : 0.05,
+    };
+  };
 
   const toCsvCell = (value) => {
     const text = String(value ?? "");
@@ -395,17 +562,21 @@ const InfrastructurePage = () => {
   };
 
   const toggleSector = (sector) => {
-    setSelectedSectors((prev) =>
-      prev.includes(sector)
+    setSelectedSectors((prev) => {
+      const next = prev.includes(sector)
         ? prev.filter((s) => s !== sector)
-        : [...prev, sector],
-    );
+        : [...prev, sector];
+      setMapRenderVersion((value) => value + 1);
+      return next;
+    });
   };
 
   const toggleRisk = (risk) => {
-    setSelectedRisks((prev) =>
-      prev.includes(risk) ? prev.filter((r) => r !== risk) : [...prev, risk],
-    );
+    setSelectedRisks((prev) => {
+      const next = prev.includes(risk) ? prev.filter((r) => r !== risk) : [...prev, risk];
+      setMapRenderVersion((value) => value + 1);
+      return next;
+    });
   };
 
   return (
@@ -555,6 +726,28 @@ const InfrastructurePage = () => {
             </div>
           </div>
 
+          <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <label className="flex items-center justify-between cursor-pointer">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={showFacilityIcons}
+                  onChange={() => {
+                    setShowFacilityIcons((value) => !value);
+                    setMapRenderVersion((value) => value + 1);
+                  }}
+                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                />
+                <span className="text-sm font-medium text-gray-700">
+                  عرض الرموز على الخريطة
+                </span>
+              </div>
+              <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${showFacilityIcons ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"}`}>
+                {showFacilityIcons ? "مفعّل" : "مغلق"}
+              </span>
+            </label>
+          </div>
+
           <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
             <h3 className="text-gray-500 text-xs font-bold uppercase mb-2">
               ملخص التأثير
@@ -623,6 +816,7 @@ const InfrastructurePage = () => {
           )}
 
           <MapContainer
+            key={mapRenderVersion}
             center={[31.2001, 29.9187]}
             zoom={12}
             scrollWheelZoom={true}
@@ -646,7 +840,7 @@ const InfrastructurePage = () => {
               </LayersControl.BaseLayer>
 
               <LayersControl.Overlay name="نطاق التأثير المتوقع">
-                <LayerGroup>
+                <LayerGroup key={`${filterStateKey}-impact`}>
                   {highImpactFacilities.map((facility) => {
                     const normalizedRisk = normalizeRiskValue(facility.risk);
                     const ringColor = getRiskColor(normalizedRisk);
@@ -668,101 +862,115 @@ const InfrastructurePage = () => {
                 </LayerGroup>
               </LayersControl.Overlay>
 
-              <LayersControl.Overlay checked name="المنشآت الحيوية">
-                <LayerGroup>
-                  {filteredFacilities.map((facility) => (
-                    <Marker
-                      key={facility.id}
-                      position={[facility.lat, facility.lng]}
-                      icon={createCustomIcon(facility.type, facility.risk)}
-                    >
-                      <Popup className="font-arabic custom-popup">
-                        <div className="p-1 min-w-[200px]" dir="rtl">
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <h3 className="font-bold text-gray-900 text-base">
-                                {facility.name}
-                              </h3>
-                              <span className="text-xs text-gray-500">
-                                {facility.typeLabel}
-                              </span>
-                            </div>
-                            <span
-                              className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                                facility.risk === "extreme"
-                                  ? "bg-red-100 text-red-600"
-                                  : facility.risk === "high"
-                                    ? "bg-orange-100 text-orange-600"
-                                    : facility.risk === "medium"
-                                      ? "bg-yellow-100 text-yellow-600"
-                                      : "bg-green-100 text-green-600"
-                              }`}
-                            >
-                              {facility.riskLabel}
-                            </span>
+              <LayersControl.Overlay checked name="حدود الأقسام">
+                <LayerGroup key={`${filterStateKey}-qisms`}>
+                  {qismBoundaries && (
+                    <GeoJSON
+                      key={qismBoundaryLayerKey}
+                      data={qismBoundaries}
+                      style={(feature) =>
+                        getDistrictBoundaryStyle(feature.properties.nameAr)
+                      }
+                      onEachFeature={(feature, layer) => {
+                        const { nameAr, nameEn, centerLat, centerLon } =
+                          feature.properties;
+                        const districtFacilities = getFacilitiesInDistrict(
+                          nameAr,
+                          filteredFacilities,
+                        );
+                        const districtRisk = getDistrictRiskLevel(
+                          nameAr,
+                          filteredFacilities,
+                          modelHighRiskAreas,
+                          normalizeRiskValue,
+                          getRiskPriority,
+                        );
+
+                        layer.bindPopup(`
+                          <div dir="rtl" class="font-arabic" style="min-width:180px">
+                            <h3 style="font-weight:700;margin:0 0 4px">${stripQismPrefix(nameAr)}</h3>
+                            <p style="font-size:11px;color:#6b7280;margin:0 0 8px">${nameEn || ""}</p>
+                            <p style="font-size:12px;margin:0 0 4px">
+                              منشآت مرئية: <strong>${districtFacilities.length}</strong>
+                            </p>
+                            <p style="font-size:12px;margin:0 0 4px">
+                              مستوى الخطر: <strong>${districtRisk || "غير متأثر"}</strong>
+                            </p>
+                            <p style="font-size:11px;color:#6b7280;margin:0">
+                              مركز القسم: ${Number(centerLat).toFixed(4)}, ${Number(centerLon).toFixed(4)}
+                            </p>
                           </div>
-
-                          <div className="grid grid-cols-2 gap-2 mb-3 bg-gray-50 p-2 rounded-lg border border-gray-100">
-                            <div>
-                              <span className="text-[10px] text-gray-500 block">
-                                عمق الغمر
-                              </span>
-                              <span className="font-bold text-sm text-gray-800">
-                                {facility.floodDepth}
-                              </span>
-                            </div>
-                            <div>
-                              <span className="text-[10px] text-gray-500 block">
-                                الحالة
-                              </span>
-                              <span
-                                className={`font-bold text-sm ${
-                                  facility.status === "Critical"
-                                    ? "text-red-600"
-                                    : facility.status === "Warning"
-                                      ? "text-orange-500"
-                                      : "text-green-600"
-                                }`}
-                              >
-                                {facility.status}
-                              </span>
-                            </div>
-                          </div>
-
-                          <p className="text-xs text-gray-500 mb-2">
-                            القسم: <span className="font-bold text-gray-700">{facility.qism}</span>
-                          </p>
-
-                          <div className="grid grid-cols-2 gap-2 mb-2 text-[11px] text-gray-600 bg-gray-50 border border-gray-100 rounded-lg p-2">
-                            <div>
-                              إحداثيات: <span className="font-bold">{facility.lat.toFixed(4)}, {facility.lng.toFixed(4)}</span>
-                            </div>
-                            <div>
-                              نطاق التأثير: <span className="font-bold">{getImpactRadiusMeters(normalizeRiskValue(facility.risk))}م</span>
-                            </div>
-                            <div className="col-span-2">
-                              سيناريو العرض: <span className="font-bold">{selectedScenario} - {selectedYear}</span>
-                            </div>
-                          </div>
-
-                          <p className="text-xs text-gray-600 mb-3 bg-white p-2 border border-gray-100 rounded">
-                            <Info className="w-3 h-3 inline ml-1 text-blue-500" />
-                            {facility.description}
-                          </p>
-
-                          <button className="w-full flex items-center justify-center gap-1 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-blue-600 rounded-lg text-xs font-bold transition-colors shadow-sm">
-                            عرض التحليل الكامل
-                            <ChevronDown className="w-3 h-3 rotate-90" />
-                          </button>
-                        </div>
-                      </Popup>
-                    </Marker>
-                  ))}
+                        `);
+                      }}
+                    />
+                  )}
                 </LayerGroup>
               </LayersControl.Overlay>
+
+              <LayersControl.Overlay name="الحدود الإدارية">
+                <LayerGroup key={`${filterStateKey}-admin`}>
+                  {adminBoundaries && (
+                    <GeoJSON
+                      data={adminBoundaries}
+                      style={{
+                        color: "#0f766e",
+                        weight: 1.5,
+                        fillColor: "#14b8a6",
+                        fillOpacity: 0.08,
+                      }}
+                      onEachFeature={(feature, layer) => {
+                        const properties = feature?.properties || {};
+                        const name = properties.adm1_name || properties.adm1_name1 || "الإسكندرية";
+                        layer.bindPopup(`
+                          <div dir="rtl" class="font-arabic" style="min-width:160px">
+                            <h3 style="font-weight:700;margin:0 0 4px">${name}</h3>
+                            <p style="font-size:11px;color:#6b7280;margin:0">حدود إدارية معروضة من ملف GeoJSON المرتبط بالمشروع</p>
+                          </div>
+                        `);
+                      }}
+                    />
+                  )}
+                </LayerGroup>
+              </LayersControl.Overlay>
+
+              {shouldRenderFacilityIcons && (
+                <>
+                  <LayersControl.Overlay checked name="المواقع (الكل)">
+                    <LayerGroup key={`${filterStateKey}-${shouldRenderFacilityIcons}-all-facilities`} />
+                  </LayersControl.Overlay>
+                  <FacilityOverlayLayer
+                    facilities={filteredFacilities}
+                    visible={shouldRenderFacilityIcons}
+                    title="المواقع (الكل)"
+                  />
+                  {[
+                    { key: "ports", label: "الموانئ", facilities: facilitiesByType.ports },
+                    { key: "hospitals", label: "المستشفيات", facilities: facilitiesByType.hospitals },
+                    { key: "transport", label: "النقل", facilities: facilitiesByType.transport },
+                    { key: "utilities", label: "المرافق", facilities: facilitiesByType.utilities },
+                  ].filter((layer) => layer.facilities.length > 0).map((layer) => (
+                    <LayersControl.Overlay key={`${layer.key}-overlay`} name={layer.label}>
+                      <LayerGroup key={`${filterStateKey}-${layer.key}-facilities`} />
+                    </LayersControl.Overlay>
+                  ))}
+                  {[
+                    { key: "ports", label: "الموانئ", facilities: facilitiesByType.ports },
+                    { key: "hospitals", label: "المستشفيات", facilities: facilitiesByType.hospitals },
+                    { key: "transport", label: "النقل", facilities: facilitiesByType.transport },
+                    { key: "utilities", label: "المرافق", facilities: facilitiesByType.utilities },
+                  ].filter((layer) => layer.facilities.length > 0).map((layer) => (
+                    <FacilityOverlayLayer
+                      key={`${layer.key}-overlay-layer`}
+                      facilities={layer.facilities}
+                      visible={shouldRenderFacilityIcons}
+                      title={layer.label}
+                    />
+                  ))}
+                </>
+              )}
             </LayersControl>
 
-            <FitFilteredFacilitiesBounds facilities={filteredFacilities} />
+            <FitFilteredFacilitiesBounds key={`${filterStateKey}-${mapRenderVersion}`} facilities={filteredFacilities} />
 
             {filteredFacilities.length === 0 && (
               <div className="leaflet-top leaflet-left">

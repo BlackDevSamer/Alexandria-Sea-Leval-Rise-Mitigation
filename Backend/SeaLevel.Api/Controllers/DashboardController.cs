@@ -7,7 +7,7 @@ using SeaLevel.Application.Services.Interfaces;
 namespace SeaLevel.Api.Controllers;
 
 [ApiController]
-[Authorize]
+[AllowAnonymous]
 [Route("api/dashboard")]
 public class DashboardController : ControllerBase
 {
