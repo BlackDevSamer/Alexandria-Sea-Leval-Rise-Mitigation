@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import Header from "./Header";
 import { useRiskStore } from "../store/riskStore";
-import { RiskMap } from "./RiskMap";
+// RiskMap removed from home; maps now live on feature pages
 import {
   Users,
   Waves,
@@ -215,102 +215,14 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* Section 2: Geospatial Risk Visualization */}
-        <section className="space-y-6 animate-slide-up delay-100">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              تصور المخاطر المكانية
-            </h2>
-            <p className="text-gray-600 text-sm">
-              نمذجة الغمر في الوقت الفعلي بناءً على قياس الأعماق الحالي وهبوط
-              الأرض.
-            </p>
-          </div>
-
-          <div className="relative h-[500px] w-full bg-gray-100 rounded-3xl overflow-hidden border border-gray-200 shadow-lg group">
-            <RiskMap
-              className="h-full w-full rounded-none border-0 shadow-none"
-              showLegend={false}
-              defaultDensityVisible={false}
-              showStatsOverlay={true}
-            />
-
-            {/* Map Overlay HUD */}
-            <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-8">
-              <div className="flex justify-start items-start gap-4">
-                <div className="bg-white/92 backdrop-blur-md border border-gray-200 p-4 rounded-2xl pointer-events-auto shadow-md max-w-md">
-                  <h4 className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-widest">
-                    ملخص المخاطر اللحظي
-                  </h4>
-
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div className="bg-gray-50 border border-gray-100 rounded-lg p-2">
-                      <div className="text-gray-500 mb-1">مستوى الخطر</div>
-                      <div className="font-bold text-gray-900">{mapRiskLabel}</div>
-                    </div>
-                    <div className="bg-gray-50 border border-gray-100 rounded-lg p-2">
-                      <div className="text-gray-500 mb-1">المساحة المغمورة</div>
-                      <div className="font-bold text-gray-900">
-                        {mapData?.floodedAreaKm2
-                          ? `${Number(mapData.floodedAreaKm2).toFixed(2)} كم²`
-                          : "--"}
-                      </div>
-                    </div>
-                    <div className="bg-gray-50 border border-gray-100 rounded-lg p-2">
-                      <div className="text-gray-500 mb-1">الأحياء المهددة</div>
-                      <div className="font-bold text-red-600">
-                        {dashboardData?.highRiskAreas?.length || 0}
-                      </div>
-                    </div>
-                    <div className="bg-gray-50 border border-gray-100 rounded-lg p-2">
-                      <div className="text-gray-500 mb-1">السكان المعرضون</div>
-                      <div className="font-bold text-gray-900">
-                        {dashboardData?.populationAtRisk
-                          ? Number(dashboardData.populationAtRisk).toLocaleString()
-                          : "--"}
-                      </div>
-                    </div>
-                  </div>
-
-                  <p className="mt-3 text-xs leading-relaxed text-gray-600 border-t border-gray-100 pt-2">
-                    {mapData?.description ||
-                      "تُعرض الخريطة طبقات الخطر المكانية مع تحديث فوري حسب السيناريو والسنة."}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex justify-between items-end gap-4">
-                <div className="bg-white/85 backdrop-blur-sm px-4 py-2 rounded-lg border border-gray-200 text-[10px] font-mono text-gray-600 uppercase tracking-widest shadow-sm">
-                  {selectedScenario} | {selectedYear} | LAT: 31.2001° N | LONG: 29.9187° E
-                </div>
-
-                <div className="bg-white/90 backdrop-blur-md border border-gray-200 px-4 py-3 rounded-xl shadow-sm min-w-[200px] pointer-events-auto">
-                  <div className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">
-                    أعلى قسم متأثر
-                  </div>
-                  <div className="text-sm font-bold text-gray-900 truncate">
-                    {topExposedQism?.name || "--"}
-                  </div>
-                  <div className="text-xs text-red-600 mt-1 font-semibold">
-                    {topExposedQism?.exposedPopulation
-                      ? `${Number(topExposedQism.exposedPopulation).toLocaleString()} نسمة`
-                      : "لا توجد بيانات"}
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    نسبة التعرض: {exposedShare !== null ? `${exposedShare.toFixed(1)}%` : "--"}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Section 2: Removed from Home — primary maps moved to feature pages (Predictions / Infrastructure) */}
 
         {/* Section 3: Threat Landscape */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-16 py-12 items-center animate-slide-up delay-200">
           <div className="space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-600 text-[10px] font-bold uppercase tracking-widest">
               <AlertTriangle className="w-3 h-3" />
-              محركات الضعف
+              محركات الهشاشة
             </div>
             <h2 className="text-4xl font-bold text-gray-900 leading-tight">
               فهم مشهد التهديدات المتزايد
@@ -429,8 +341,8 @@ const HomePage = () => {
               <h4 className="text-gray-900 font-bold text-lg mb-3">
                 تحليل مستوى الأقسام
               </h4>
-              <p className="text-gray-500 text-sm">
-                توزيع محلي للغاية لمقاييس المخاطر ومؤشرات الضعف.
+                <p className="text-gray-500 text-sm">
+                توزيع محلي للغاية لمقاييس المخاطر ومؤشرات الهشاشة.
               </p>
             </Link>
 
@@ -459,8 +371,8 @@ const HomePage = () => {
               <h4 className="text-gray-900 font-bold text-lg mb-3">
                 مخاطر البنية التحتية
               </h4>
-              <p className="text-gray-500 text-sm">
-                تقييم الضعف للموانئ والمواقع التراثية والممرات المرورية.
+                <p className="text-gray-500 text-sm">
+                تقييم هشاشة الموانئ والمواقع التراثية والممرات المرورية.
               </p>
             </Link>
 
@@ -491,10 +403,10 @@ const HomePage = () => {
             </div>
             <div>
               <h3 className="text-gray-900 font-bold text-sm tracking-tight">
-                تقييم مخاطر سواحل الإسكندرية
+                AlexGuard
               </h3>
               <p className="text-gray-500 text-xs">
-                © 2024 معهد البحوث والسياسات البحرية. جميع الحقوق محفوظة.
+                AlexGuard in collaboration with the National Institute of Oceanography and Fisheries
               </p>
             </div>
           </div>

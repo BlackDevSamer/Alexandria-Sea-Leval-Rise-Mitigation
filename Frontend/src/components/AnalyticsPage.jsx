@@ -161,8 +161,8 @@ const AnalyticsPage = () => {
         <div className="mb-8 animate-slide-up">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              تحليل ضعف السكان
-            </h1>
+                تحليل الهشاشة السكانية
+              </h1>
             <p className="text-gray-500 text-sm">
               تصور تأثيرات ارتفاع مستوى سطح البحر (SLR) على توزيع السكان تحت
               سيناريوهات IPCC SSP.
@@ -274,7 +274,7 @@ const AnalyticsPage = () => {
             {/* Chart Card: Housing Vulnerability */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex-1 flex flex-col">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-gray-800">ضعف الإسكان</h3>
+                <h3 className="font-bold text-gray-800">هشاشة الإسكان</h3>
                 <button className="text-gray-400 hover:text-gray-600">
                   •••
                 </button>
@@ -289,7 +289,7 @@ const AnalyticsPage = () => {
                         {vulnerabilityIndex !== null ? `${vulnerabilityIndex.toFixed(1)}%` : "--"}
                       </span>
                       <span className="text-xs font-bold text-gray-500 uppercase">
-                        {vulnerabilityLevel !== "--" ? `مستوى ${vulnerabilityLevel}` : "مؤشر الضعف"}
+                        {vulnerabilityLevel !== "--" ? `مستوى ${vulnerabilityLevel}` : "مؤشر الهشاشة"}
                       </span>
                     </div>
 
@@ -409,7 +409,7 @@ const AnalyticsPage = () => {
                         السكان المتأثرين
                       </th>
                       <th className="pb-3 text-xs font-bold text-gray-500">
-                        مؤشر الضعف
+                        مؤشر الهشاشة
                       </th>
                     </tr>
                   </thead>

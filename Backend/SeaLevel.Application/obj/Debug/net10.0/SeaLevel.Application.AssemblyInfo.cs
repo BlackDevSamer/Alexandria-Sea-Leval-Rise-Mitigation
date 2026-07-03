@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SeaLevel.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1c4d8855e5088c177bd15eaffdce40107739b281")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+42c587437f8939fd44f28f6ccc06b869efb4c5a3")]
 [assembly: System.Reflection.AssemblyProductAttribute("SeaLevel.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SeaLevel.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

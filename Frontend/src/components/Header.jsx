@@ -54,16 +54,6 @@ const Header = ({ active = "home" }) => {
             التنبؤات
           </Link>
           <Link
-            to="/analytics"
-            className={`text-sm font-medium transition-colors ${
-              active === "analytics"
-                ? "text-blue-600 border-b-2 border-blue-600 pb-1 font-bold"
-                : "text-gray-500 hover:text-blue-600"
-            }`}
-          >
-            التحليلات
-          </Link>
-          <Link
             to="/infrastructure"
             className={`text-sm font-medium transition-colors ${
               active === "infrastructure"
@@ -72,16 +62,6 @@ const Header = ({ active = "home" }) => {
             }`}
           >
             البنية التحتية
-          </Link>
-          <Link
-            to="/reports"
-            className={`text-sm font-medium transition-colors ${
-              active === "reports"
-                ? "text-blue-600 border-b-2 border-blue-600 pb-1 font-bold"
-                : "text-gray-500 hover:text-blue-600"
-            }`}
-          >
-            التقارير
           </Link>
         </nav>
 
@@ -104,9 +84,7 @@ const Header = ({ active = "home" }) => {
           تسجيل الخروج
         </button>
         <div className="text-right">
-          <h2 className="text-xs font-bold text-gray-900">
-            وزارة الموارد المائية والري
-          </h2>
+          <h2 className="text-xs font-bold text-gray-900">AlexGuard</h2>
           <p className="text-[10px] text-gray-500">نظام إدارة تنبؤات الفيضان</p>
         </div>
         <img
