@@ -362,7 +362,7 @@ const HomePage = () => {
             </Link>
 
             <Link
-              to="/predictions"
+              to="/argentIntervention"
               className="bg-white border border-gray-200 p-8 rounded-2xl hover:bg-gray-50 hover:border-blue-500/50 transition-all group flex flex-col items-center text-center shadow-sm hover:shadow-md"
             >
               <div className="w-16 h-16 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-blue-50 transition-all">

@@ -89,13 +89,13 @@ const getRiskPriority = (risk) => {
 };
 
 const LAND_USE_CATEGORY_OPTIONS = [
-  { key: "health", label: "صحي" },
-  { key: "educational", label: "تعليمي" },
-  { key: "leisure", label: "ترفيهي" },
-  { key: "cultural", label: "ثقافي" },
-  { key: "civil protection", label: "دفاع مدني" },
-  { key: "heritage", label: "اثري" },
-  { key: "infrastructure", label: "مرافق عامه" },
+  { key: "health", label: "صحي", icon: HeartPulse },
+  { key: "educational", label: "تعليمي", icon: GraduationCap },
+  { key: "leisure", label: "ترفيهي", icon: FerrisWheel },
+  { key: "cultural", label: "ثقافي", icon: Palette },
+  { key: "civil protection", label: "دفاع مدني", icon: ShieldCheck },
+  { key: "heritage", label: "اثري", icon: Landmark },
+  { key: "infrastructure", label: "مرافق عامه", icon: Building2 },
 ];
 
 const LAND_USE_CATEGORY_COLORS = {
@@ -254,7 +254,7 @@ const FacilityOverlayLayer = ({ facilities, visible, title }) => {
   return null;
 };
 
-const PredictionsPage = () => {
+const argentIntervention = () => {
   const { addToast } = useToast();
   const { selectedScenario, selectedYear } = useRiskStore();
   const [selectedSectors, setSelectedSectors] = useState([
@@ -749,7 +749,7 @@ const PredictionsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans" dir="rtl">
-      <Header active="predictions" />
+      <Header active="argentIntervention" />
 
       <main className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         <aside className="w-full lg:w-80 bg-white border-l border-gray-200 p-6 overflow-y-auto z-10 shadow-lg">
@@ -758,22 +758,33 @@ const PredictionsPage = () => {
               فلاتر الاستخدام الأرضي
             </h2>
             <div className="space-y-3">
-              {LAND_USE_CATEGORY_OPTIONS.map((option) => (
-                <label
-                  key={option.key}
-                  className="flex items-center gap-3 cursor-pointer group p-2 hover:bg-gray-50 rounded-lg transition-colors"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedLandUseCategories.includes(option.key)}
-                    onChange={() => toggleLandUseCategory(option.key)}
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                  />
-                  <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
-                    {option.label}
-                  </span>
-                </label>
-              ))}
+              {LAND_USE_CATEGORY_OPTIONS.map((option) => {
+                const Icon = option.icon;
+                const categoryColor = LAND_USE_CATEGORY_COLORS[option.key] || "#64748b";
+
+                return (
+                  <label
+                    key={option.key}
+                    className="flex items-center gap-3 cursor-pointer group p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedLandUseCategories.includes(option.key)}
+                      onChange={() => toggleLandUseCategory(option.key)}
+                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                    />
+                    <span
+                      className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                      style={{ backgroundColor: `${categoryColor}1A`, color: categoryColor }}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </span>
+                    <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                      {option.label}
+                    </span>
+                  </label>
+                );
+              })}
             </div>
           </div>
 
@@ -819,13 +830,13 @@ const PredictionsPage = () => {
         </aside>
 
         <div className="flex-1 relative flex flex-col">
-          <div className="absolute top-4 right-4 left-4 z-[400] flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pointer-events-none">
-            <div className="bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg border border-gray-100 pointer-events-auto">
+          <div className="absolute top-4 left-4 z-[400] pointer-events-none">
+            {/* <div className="bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg border border-gray-100 pointer-events-auto">
               <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
                 <Home className="w-3 h-3" /> / تقييم البنية التحتية
               </div>
               <h1 className="text-xl font-bold text-gray-900">تقييم البنية التحتية والمرافق - الإسكندرية</h1>
-            </div>
+            </div> */}
 
             <div className="flex gap-2 pointer-events-auto">
               <button
@@ -1053,4 +1064,4 @@ const PredictionsPage = () => {
   );
 };
 
-export default PredictionsPage;
+export default argentIntervention;

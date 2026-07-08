@@ -44,9 +44,9 @@ const Header = ({ active = "home" }) => {
             الرئيسية
           </Link>
           <Link
-            to="/predictions"
+            to="/argentIntervention"
             className={`text-sm font-medium transition-colors ${
-              active === "predictions"
+              active === "argentIntervention"
                 ? "text-blue-600 border-b-2 border-blue-600 pb-1 font-bold"
                 : "text-gray-500 hover:text-blue-600"
             }`}
@@ -64,9 +64,9 @@ const Header = ({ active = "home" }) => {
             التحليلات
           </Link>
           <Link
-            to="/infrastructure"
+            to="/futurePlaning"
             className={`text-sm font-medium transition-colors ${
-              active === "infrastructure"
+              active === "futurePlaning"
                 ? "text-blue-600 border-b-2 border-blue-600 pb-1 font-bold"
                 : "text-gray-500 hover:text-blue-600"
             }`}

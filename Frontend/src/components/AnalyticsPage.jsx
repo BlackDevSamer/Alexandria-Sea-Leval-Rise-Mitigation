@@ -154,22 +154,10 @@ const AnalyticsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans" dir="rtl">
-      <Header active="analytics" />
+      <Header active="Analytics" />
 
       <main className="container mx-auto px-6 py-8">
-        {/* Top Header Section */}
-        <div className="mb-8 animate-slide-up">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                تحليل الهشاشة السكانية
-              </h1>
-            <p className="text-gray-500 text-sm">
-              تصور تأثيرات ارتفاع مستوى سطح البحر (SLR) على توزيع السكان تحت
-              سيناريوهات IPCC SSP.
-            </p>
-          </div>
-        </div>
-
+        
         {/* Main Grid Content */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full animate-slide-up delay-100">
           {/* Map Section (Main visual) - Takes 8 columns */}
