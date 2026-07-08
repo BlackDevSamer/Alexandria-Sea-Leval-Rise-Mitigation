@@ -54,6 +54,16 @@ const Header = ({ active = "home" }) => {
             التنبؤات
           </Link>
           <Link
+            to="/Analytics"
+            className={`text-sm font-medium transition-colors ${
+              active === "Analytics"
+                ? "text-blue-600 border-b-2 border-blue-600 pb-1 font-bold"
+                : "text-gray-500 hover:text-blue-600"
+            }`}
+          >
+            التحليلات
+          </Link>
+          <Link
             to="/infrastructure"
             className={`text-sm font-medium transition-colors ${
               active === "infrastructure"

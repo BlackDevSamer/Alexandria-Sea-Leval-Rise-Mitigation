@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import Header from "./Header";
 import {
   MapContainer,
-  TileLayer,
   Marker,
   Popup,
   ZoomControl,
@@ -24,6 +23,13 @@ import {
   Info,
   ChevronDown,
   Home,
+  HeartPulse,
+  GraduationCap,
+  FerrisWheel,
+  Palette,
+  ShieldCheck,
+  Landmark,
+  Building2,
 } from "lucide-react";
 import { dataService } from "../services/dataService";
 import { useToast } from "../contexts/useToast";
@@ -80,14 +86,115 @@ const getRiskPriority = (risk) => {
   return 1;
 };
 
-// Styled Google roads tiles with generic POIs hidden to reduce map clutter.
-const GOOGLE_ROADS_NO_POI_TILE_URL =
-  "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}" +
-  "&style=feature:poi%7Cvisibility:off" +
-  "&style=feature:poi.business%7Cvisibility:off" +
-  "&style=feature:poi.park%7Cvisibility:off" +
-  "&style=feature:transit.station%7Cvisibility:off" +
-  "&style=feature:road%7Celement:labels.icon%7Cvisibility:off";
+const LAND_USE_CATEGORY_OPTIONS = [
+  { key: "health", label: "صحي" },
+  { key: "educational", label: "تعليمي" },
+  { key: "leisure", label: "ترفيهي" },
+  { key: "cultural", label: "ثقافي" },
+  { key: "civil protection", label: "دفاع مدني" },
+  { key: "heritage", label: "اثري" },
+  { key: "infrastructure", label: "مرافق عامه" },
+];
+
+const LAND_USE_CATEGORY_COLORS = {
+  health: "#ef4444",
+  educational: "#16a34a",
+  leisure: "#f59e0b",
+  cultural: "#7c3aed",
+  "civil protection": "#0ea5e9",
+  heritage: "#db2777",
+  infrastructure: "#14b8a6",
+};
+
+const getLandUseCategoryLabel = (category) => {
+  const option = LAND_USE_CATEGORY_OPTIONS.find((item) => item.key === category);
+  return option?.label || category || "غير معروف";
+};
+
+const getLandUseStyle = (feature) => {
+  const category = feature?.properties?.category;
+  return {
+    color: LAND_USE_CATEGORY_COLORS[category] || "#64748b",
+    weight: 2,
+    fillColor: LAND_USE_CATEGORY_COLORS[category] || "#64748b",
+    fillOpacity: 0.18,
+    opacity: 0.8,
+  };
+};
+
+// Elevation color ramp for the DEM layer (meters above/below sea level)
+const DEM_COLOR_STOPS = [
+  { max: 0, color: "#08306b" }, // below sea level - deep blue
+  { max: 0.5, color: "#2171b5" },
+  { max: 1, color: "#6baed6" },
+  { max: 2, color: "#a6d96a" },
+  { max: 3, color: "#fee08b" },
+  { max: 5, color: "#fdae61" },
+  { max: 8, color: "#f46d43" },
+  { max: Infinity, color: "#a50026" }, // highest ground - dark red
+];
+
+const getElevationColor = (elevation) => {
+  const value = Number(elevation);
+  if (Number.isNaN(value)) return "#94a3b8";
+
+  const stop = DEM_COLOR_STOPS.find((item) => value <= item.max);
+  return stop ? stop.color : "#a50026";
+};
+
+const getDemStyle = (feature) => {
+  const elevation = feature?.properties?.elevation_m;
+  const color = getElevationColor(elevation);
+
+  return {
+    color,
+    weight: 0,
+    fillColor: color,
+    fillOpacity: 0.55,
+    stroke: false,
+  };
+};
+
+const getDemPopupHtml = (feature) => {
+  const elevation = feature?.properties?.elevation_m;
+  const elevationText =
+    elevation === undefined || elevation === null ? "غير متوفر" : `${Number(elevation).toFixed(2)} م`;
+
+  return `<div dir="rtl" style="min-width:160px;line-height:1.5">
+    <div style="font-weight:700;margin-bottom:4px;">ارتفاع سطح الأرض</div>
+    <div><strong>القيمة:</strong> ${elevationText}</div>
+  </div>`;
+};
+
+const DEM_LEGEND_ITEMS = [
+  { label: "أقل من 0 م (تحت سطح البحر)", color: "#08306b" },
+  { label: "0 - 0.5 م", color: "#2171b5" },
+  { label: "0.5 - 1 م", color: "#6baed6" },
+  { label: "1 - 2 م", color: "#a6d96a" },
+  { label: "2 - 3 م", color: "#fee08b" },
+  { label: "3 - 4 م", color: "#fdae61" },
+  { label: "4 - 5 م", color: "#f46d43" },
+  { label: "أكثر من 5 م", color: "#a50026" },
+];
+
+const getLandUsePopupHtml = (feature) => {
+  const props = feature?.properties || {};
+  const title = props["name:ar"] || props.name || props["name:en"] || "مرفق";
+  const details = [
+    ["الفئة", getLandUseCategoryLabel(props.category)],
+    ["المحافظة", props.province],
+    ["الارتفاع الأدنى", props.elev_min],
+    ["نوع المرفق", props.amenity || props.building || props.landuse || props.tourism || props.healthcare || props.power],
+    ["التاريخ", props.historic],
+    ["الموقع", props.website],
+    ["مواعيد العمل", props.opening_hours],
+  ].filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== "");
+
+  return `<div dir="rtl" style="min-width:220px;line-height:1.5">
+    <div style="font-weight:700;margin-bottom:6px;">${title}</div>
+    ${details.map(([label, value]) => `<div><strong>${label}:</strong> ${value}</div>`).join("")}
+  </div>`;
+};
 
 const FitFilteredFacilitiesBounds = ({ facilities }) => {
   const map = useMap();
@@ -161,11 +268,14 @@ const InfrastructurePage = () => {
     "low",
   ]);
 
-  // State for facilities
   const [facilities, setFacilities] = useState([]);
   const [modelHighRiskAreas, setModelHighRiskAreas] = useState([]);
-  const [qismBoundaries, setQismBoundaries] = useState(null);
-  const [adminBoundaries, setAdminBoundaries] = useState(null);
+  const [admin2Boundaries, setAdmin2Boundaries] = useState(null);
+  const [landUseData, setLandUseData] = useState(null);
+  const [demData, setDemData] = useState(null);
+  const [selectedLandUseCategories, setSelectedLandUseCategories] = useState(
+    LAND_USE_CATEGORY_OPTIONS.map((option) => option.key),
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [mapRenderVersion, setMapRenderVersion] = useState(0);
   const [showFacilityIcons, setShowFacilityIcons] = useState(false);
@@ -179,40 +289,32 @@ const InfrastructurePage = () => {
 
     const loadBoundaryData = async () => {
       try {
-        const [qismResponse, adminResponse] = await Promise.all([
-          fetch(`${import.meta.env.BASE_URL}data/alexandria_qisms.geojson`),
-          fetch(`${import.meta.env.BASE_URL}data/geo/egy_admin1.geojson`),
+        const [admin2Response] = await Promise.all([
+          fetch(`${import.meta.env.BASE_URL}data/alex_admin2.geojson`),
         ]);
 
-        if (!qismResponse.ok) {
-          throw new Error(`Failed to load qism boundaries (${qismResponse.status})`);
+        if (!admin2Response.ok) {
+          throw new Error(`Failed to load admin2 boundaries (${admin2Response.status})`);
         }
 
-        if (!adminResponse.ok) {
-          throw new Error(`Failed to load admin boundaries (${adminResponse.status})`);
-        }
+        const admin2Data = await admin2Response.json();
 
-        const qismData = await qismResponse.json();
-        const adminData = await adminResponse.json();
-
-        const alexandriaFeatures = (adminData?.features || []).filter((feature) => {
+        const alexandriaAdmin2Features = (admin2Data?.features || []).filter((feature) => {
           const properties = feature?.properties || {};
           const name = `${properties.adm1_name || ""} ${properties.adm1_name1 || ""}`.trim();
           return name.toLowerCase().includes("alexandria") || name.toLowerCase().includes("الاسكندرية");
         });
 
         if (isMounted) {
-          setQismBoundaries(qismData);
-          setAdminBoundaries({
-            ...adminData,
-            features: alexandriaFeatures,
+          setAdmin2Boundaries({
+            ...admin2Data,
+            features: alexandriaAdmin2Features,
           });
         }
       } catch (error) {
-        console.error("Failed to load Alexandria boundary data", error);
+        console.error("Failed to load Alexandria ADM2 boundary data", error);
         if (isMounted) {
-          setQismBoundaries(null);
-          setAdminBoundaries(null);
+          setAdmin2Boundaries(null);
         }
       }
     };
@@ -227,12 +329,61 @@ const InfrastructurePage = () => {
   useEffect(() => {
     let isMounted = true;
 
+    const loadLandUseData = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.BASE_URL}data/land_use_final.geojson`);
+
+        if (!response.ok) {
+          throw new Error(`Failed to load land use GeoJSON (${response.status})`);
+        }
+
+        const data = await response.json();
+        if (isMounted) {
+          setLandUseData(data);
+        }
+      } catch (error) {
+        console.error("Failed to load land use data", error);
+        if (isMounted) {
+          setLandUseData(null);
+        }
+      }
+    };
+
+    const loadDemData = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.BASE_URL}data/alexandria_DEM.geojson`);
+
+        if (!response.ok) {
+          throw new Error(`Failed to load DEM GeoJSON (${response.status})`);
+        }
+
+        const data = await response.json();
+        if (isMounted) {
+          setDemData(data);
+        }
+      } catch (error) {
+        console.error("Failed to load DEM data", error);
+        if (isMounted) {
+          setDemData(null);
+        }
+      }
+    };
+
+    loadLandUseData();
+    loadDemData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
     const fetchFacilities = async () => {
       setIsLoading(true);
 
       try {
-        // Fetch facility-level and model-level area context for the same scenario/year.
-        // Facilities are filtered client-side, while modelHighRiskAreas provides cross-page area scope alignment.
         const [facilityData, dashboardData] = await Promise.all([
           dataService.getInfrastructureFacilities(selectedScenario, selectedYear),
           dataService.getDashboardData(selectedScenario, selectedYear),
@@ -263,19 +414,10 @@ const InfrastructurePage = () => {
     };
   }, [selectedScenario, selectedYear, addToast]);
 
-  // Helper to create custom colored icons
   const createCustomIcon = (type, risk) => {
     const colorClass = getRiskColor(normalizeRiskValue(risk));
-
-    // Creating HTML string for DivIcon
-    // Note: In a real app we might use ReactDOMServer to render React icons to string
-    // Here we use simple SVG strings or just colored markers div
-
-    // Simplification: We will use standard markers but color filter them or use a simpler DivIcon approach
-    // For this prototype, let's return a simple colored dot with valid HTML
-
-    // Mapping Lucide Icons to simplified SVG strings
     let svgIcon = "";
+
     if (type === "ports")
       svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg>`;
     else if (type === "hospitals")
@@ -329,16 +471,28 @@ const InfrastructurePage = () => {
 
     return facilities.filter((facility) => {
       const facilityRisk = normalizeRiskValue(facility.risk);
-      const facilitySector = String(facility.type || "")
-        .trim()
-        .toLowerCase();
+      const facilitySector = String(facility.type || "").trim().toLowerCase();
 
-      return (
-        selectedSectorSet.has(facilitySector) &&
-        selectedRisks.includes(facilityRisk)
-      );
+      return selectedSectorSet.has(facilitySector) && selectedRisks.includes(facilityRisk);
     });
   }, [facilities, selectedSectors, selectedRisks]);
+
+  const filteredLandUseFeatures = useMemo(() => {
+    if (!landUseData?.features) return [];
+
+    const selectedSet = new Set(selectedLandUseCategories);
+    return landUseData.features.filter(
+      (feature) => selectedSet.has(String(feature?.properties?.category || "").trim()),
+    );
+  }, [landUseData, selectedLandUseCategories]);
+
+  const landUseLayerData = useMemo(() => {
+    if (!landUseData) return null;
+    return {
+      ...landUseData,
+      features: filteredLandUseFeatures,
+    };
+  }, [landUseData, filteredLandUseFeatures]);
 
   const facilitiesByType = useMemo(() => {
     const grouped = {
@@ -445,10 +599,11 @@ const InfrastructurePage = () => {
       selectedYear,
       selectedSectors.join(","),
       selectedRisks.join(","),
+      selectedLandUseCategories.join(","),
       filteredFacilities.map((facility) => `${facility.id}:${facility.risk}`).join("|"),
       (modelHighRiskAreas || []).join("|"),
     ].join("::");
-  }, [filteredFacilities, modelHighRiskAreas, selectedRisks, selectedScenario, selectedSectors, selectedYear]);
+  }, [filteredFacilities, modelHighRiskAreas, selectedRisks, selectedScenario, selectedSectors, selectedYear, selectedLandUseCategories]);
 
   const shouldRenderFacilityIcons = showFacilityIcons && filteredFacilities.length > 0;
 
@@ -458,8 +613,9 @@ const InfrastructurePage = () => {
       selectedYear,
       filteredFacilities.map((facility) => `${facility.id}:${facility.risk}`).join("|"),
       (modelHighRiskAreas || []).join("|"),
+      selectedLandUseCategories.join(","),
     ].join("::");
-  }, [filteredFacilities, modelHighRiskAreas, selectedScenario, selectedYear]);
+  }, [filteredFacilities, modelHighRiskAreas, selectedScenario, selectedYear, selectedLandUseCategories]);
 
   const getDistrictBoundaryStyle = (districtNameAr) => {
     const risk = getDistrictRiskLevel(
@@ -563,9 +719,7 @@ const InfrastructurePage = () => {
 
   const toggleSector = (sector) => {
     setSelectedSectors((prev) => {
-      const next = prev.includes(sector)
-        ? prev.filter((s) => s !== sector)
-        : [...prev, sector];
+      const next = prev.includes(sector) ? prev.filter((s) => s !== sector) : [...prev, sector];
       setMapRenderVersion((value) => value + 1);
       return next;
     });
@@ -579,150 +733,61 @@ const InfrastructurePage = () => {
     });
   };
 
+  const toggleLandUseCategory = (category) => {
+    setSelectedLandUseCategories((prev) => {
+      const next = prev.includes(category) ? prev.filter((item) => item !== category) : [...prev, category];
+      setMapRenderVersion((value) => value + 1);
+      return next;
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans" dir="rtl">
       <Header active="infrastructure" />
 
       <main className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        {/* Sidebar - Filters */}
         <aside className="w-full lg:w-80 bg-white border-l border-gray-200 p-6 overflow-y-auto z-10 shadow-lg">
           <div className="mb-8">
             <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
-              القطاعات الحيوية
+              فلاتر الاستخدام الأرضي
             </h2>
             <div className="space-y-3">
-              <label className="flex items-center gap-3 cursor-pointer group p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                <input
-                  type="checkbox"
-                  checked={selectedSectors.includes("ports")}
-                  onChange={() => toggleSector("ports")}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                />
-                <div className="p-1.5 bg-blue-100 text-blue-600 rounded-md">
-                  <Anchor className="w-4 h-4" />
-                </div>
-                <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
-                  الموانئ والنقل البحري
-                </span>
-              </label>
-
-              <label className="flex items-center gap-3 cursor-pointer group p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                <input
-                  type="checkbox"
-                  checked={selectedSectors.includes("hospitals")}
-                  onChange={() => toggleSector("hospitals")}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                />
-                <div className="p-1.5 bg-red-100 text-red-600 rounded-md">
-                  <Activity className="w-4 h-4" />
-                </div>
-                <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
-                  المستشفيات
-                </span>
-              </label>
-
-              <label className="flex items-center gap-3 cursor-pointer group p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                <input
-                  type="checkbox"
-                  checked={selectedSectors.includes("transport")}
-                  onChange={() => toggleSector("transport")}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                />
-                <div className="p-1.5 bg-yellow-100 text-yellow-600 rounded-md">
-                  <Zap className="w-4 h-4" />
-                </div>
-                <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
-                  النقل
-                </span>
-              </label>
-
-              <label className="flex items-center gap-3 cursor-pointer group p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                <input
-                  type="checkbox"
-                  checked={selectedSectors.includes("utilities")}
-                  onChange={() => toggleSector("utilities")}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                />
-                <div className="p-1.5 bg-cyan-100 text-cyan-700 rounded-md">
-                  <Droplets className="w-4 h-4" />
-                </div>
-                <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
-                  المرافق (مياه وكهرباء)
-                </span>
-              </label>
+              {LAND_USE_CATEGORY_OPTIONS.map((option) => (
+                <label
+                  key={option.key}
+                  className="flex items-center gap-3 cursor-pointer group p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedLandUseCategories.includes(option.key)}
+                    onChange={() => toggleLandUseCategory(option.key)}
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                    {option.label}
+                  </span>
+                </label>
+              ))}
             </div>
           </div>
 
           <div className="mb-8">
             <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
-              شدة المخاطر
+              مفتاح ارتفاع سطح الأرض (DEM)
             </h2>
-            <div className="space-y-2">
-              <label className="flex items-center justify-between cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={selectedRisks.includes("extreme")}
-                    onChange={() => toggleRisk("extreme")}
-                    className="w-4 h-4 text-red-500 rounded focus:ring-red-400 border-gray-300"
-                  />
-                  <span className="text-sm font-medium text-gray-700">
-                    خطر حرج
-                  </span>
+            <p className="text-[11px] text-gray-400 mb-3 leading-relaxed">
+              فعّل طبقة «نموذج ارتفاع سطح الأرض (DEM)» من أداة طبقات الخريطة أعلى الخريطة لعرض ارتفاع الأرض في الإسكندرية.
+            </p>
+            <div className="space-y-1.5">
+              {DEM_LEGEND_ITEMS.map((item) => (
+                <div key={item.label} className="flex items-center gap-2">
+                  <span
+                    className="w-3.5 h-3.5 rounded-sm border border-black/10 flex-shrink-0"
+                    style={{ backgroundColor: item.color }}
+                  ></span>
+                  <span className="text-[11px] text-gray-600">{item.label}</span>
                 </div>
-                <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full">
-                  {riskCounts.extreme}
-                </span>
-              </label>
-
-              <label className="flex items-center justify-between cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={selectedRisks.includes("high")}
-                    onChange={() => toggleRisk("high")}
-                    className="w-4 h-4 text-orange-500 rounded focus:ring-orange-400 border-gray-300"
-                  />
-                  <span className="text-sm font-medium text-gray-700">
-                    خطر مرتفع
-                  </span>
-                </div>
-                <span className="bg-orange-100 text-orange-700 text-xs font-bold px-2 py-0.5 rounded-full">
-                  {riskCounts.high}
-                </span>
-              </label>
-              <label className="flex items-center justify-between cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={selectedRisks.includes("medium")}
-                    onChange={() => toggleRisk("medium")}
-                    className="w-4 h-4 text-yellow-500 rounded focus:ring-yellow-400 border-gray-300"
-                  />
-                  <span className="text-sm font-medium text-gray-700">
-                    خطر متوسط
-                  </span>
-                </div>
-                <span className="bg-yellow-100 text-yellow-700 text-xs font-bold px-2 py-0.5 rounded-full">
-                  {riskCounts.medium}
-                </span>
-              </label>
-              <label className="flex items-center justify-between cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={selectedRisks.includes("low")}
-                    onChange={() => toggleRisk("low")}
-                    className="w-4 h-4 text-green-500 rounded focus:ring-green-400 border-gray-300"
-                  />
-                  <span className="text-sm font-medium text-gray-700">
-                    خطر منخفض
-                  </span>
-                </div>
-                <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">
-                  {riskCounts.low}
-                </span>
-              </label>
+              ))}
             </div>
           </div>
 
@@ -738,9 +803,7 @@ const InfrastructurePage = () => {
                   }}
                   className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                 />
-                <span className="text-sm font-medium text-gray-700">
-                  عرض الرموز على الخريطة
-                </span>
+                <span className="text-sm font-medium text-gray-700">عرض الرموز على الخريطة</span>
               </div>
               <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${showFacilityIcons ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"}`}>
                 {showFacilityIcons ? "مفعّل" : "مغلق"}
@@ -749,9 +812,7 @@ const InfrastructurePage = () => {
           </div>
 
           <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-            <h3 className="text-gray-500 text-xs font-bold uppercase mb-2">
-              ملخص التأثير
-            </h3>
+            <h3 className="text-gray-500 text-xs font-bold uppercase mb-2">ملخص التأثير</h3>
             <div className="flex items-end gap-2 mb-1">
               <span className="text-3xl font-extrabold text-gray-900">
                 {isLoading ? (
@@ -760,33 +821,24 @@ const InfrastructurePage = () => {
                   deeplyFloodedFacilities.length
                 )}
               </span>
-              <span className="text-sm font-bold text-gray-600 mb-1">
-                منشأة حيوية
-              </span>
+              <span className="text-sm font-bold text-gray-600 mb-1">منشأة حيوية</span>
             </div>
             <p className="text-xs text-gray-500 leading-relaxed">
-              متوقع تعرضها للغمر &gt; 0.5م في ظل سيناريو {selectedScenario}{" "}
-              بحلول عام {selectedYear}.
+              متوقع تعرضها للغمر &gt; 0.5م في ظل سيناريو {selectedScenario} بحلول عام {selectedYear}.
             </p>
             {!isLoading && (
-              <p className="text-[11px] text-gray-400 mt-1">
-                من إجمالي {filteredFacilities.length} منشأة مرئية.
-              </p>
+              <p className="text-[11px] text-gray-400 mt-1">من إجمالي {filteredFacilities.length} منشأة مرئية.</p>
             )}
           </div>
         </aside>
 
-        {/* Main Content - Map */}
         <div className="flex-1 relative flex flex-col">
-          {/* Map Header Overlay */}
           <div className="absolute top-4 right-4 left-4 z-[400] flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pointer-events-none">
             <div className="bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg border border-gray-100 pointer-events-auto">
               <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
                 <Home className="w-3 h-3" /> / تقييم البنية التحتية
               </div>
-              <h1 className="text-xl font-bold text-gray-900">
-                تقييم البنية التحتية والمرافق - الإسكندرية
-              </h1>
+              <h1 className="text-xl font-bold text-gray-900">تقييم البنية التحتية والمرافق - الإسكندرية</h1>
             </div>
 
             <div className="flex gap-2 pointer-events-auto">
@@ -824,81 +876,30 @@ const InfrastructurePage = () => {
             zoomControl={false}
           >
             <ZoomControl position="bottomright" />
-            <LayersControl position="topright">
-              <LayersControl.BaseLayer checked name="خريطة الطرق">
-                <TileLayer
-                  attribution='&copy; <a href="https://www.google.com/maps">Google Maps</a>'
-                  url={GOOGLE_ROADS_NO_POI_TILE_URL}
-                />
-              </LayersControl.BaseLayer>
-
-              <LayersControl.BaseLayer name="قمر صناعي">
-                <TileLayer
-                  attribution='&copy; <a href="https://www.google.com/maps">Google Maps</a>'
-                  url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
-                />
-              </LayersControl.BaseLayer>
-
-              <LayersControl.Overlay name="نطاق التأثير المتوقع">
-                <LayerGroup key={`${filterStateKey}-impact`}>
-                  {highImpactFacilities.map((facility) => {
-                    const normalizedRisk = normalizeRiskValue(facility.risk);
-                    const ringColor = getRiskColor(normalizedRisk);
-
-                    return (
-                      <Circle
-                        key={`${facility.id}-impact`}
-                        center={[facility.lat, facility.lng]}
-                        radius={getImpactRadiusMeters(normalizedRisk)}
-                        pathOptions={{
-                          color: ringColor,
-                          fillColor: ringColor,
-                          fillOpacity: 0.12,
-                          weight: 1.5,
-                        }}
-                      />
-                    );
-                  })}
-                </LayerGroup>
-              </LayersControl.Overlay>
-
-              <LayersControl.Overlay checked name="حدود الأقسام">
-                <LayerGroup key={`${filterStateKey}-qisms`}>
-                  {qismBoundaries && (
+            <LayersControl position="bottomleft">
+              <LayersControl.Overlay checked name="حدود الأقسام الإدارية (ADM2)">
+                <LayerGroup key={`${filterStateKey}-admin2`}>
+                  {admin2Boundaries && (
                     <GeoJSON
-                      key={qismBoundaryLayerKey}
-                      data={qismBoundaries}
-                      style={(feature) =>
-                        getDistrictBoundaryStyle(feature.properties.nameAr)
-                      }
+                      data={admin2Boundaries}
+                      style={{
+                        color: "#2563eb",
+                        weight: 1.5,
+                        fillColor: "#3b82f6",
+                        fillOpacity: 0.12,
+                      }}
                       onEachFeature={(feature, layer) => {
-                        const { nameAr, nameEn, centerLat, centerLon } =
-                          feature.properties;
-                        const districtFacilities = getFacilitiesInDistrict(
-                          nameAr,
-                          filteredFacilities,
-                        );
-                        const districtRisk = getDistrictRiskLevel(
-                          nameAr,
-                          filteredFacilities,
-                          modelHighRiskAreas,
-                          normalizeRiskValue,
-                          getRiskPriority,
-                        );
-
+                        const properties = feature?.properties || {};
+                        const name =
+                          properties.adm2_name1 ||
+                          properties.adm2_ref_name ||
+                          properties.adm2_name ||
+                          "قسم";
                         layer.bindPopup(`
-                          <div dir="rtl" class="font-arabic" style="min-width:180px">
-                            <h3 style="font-weight:700;margin:0 0 4px">${stripQismPrefix(nameAr)}</h3>
-                            <p style="font-size:11px;color:#6b7280;margin:0 0 8px">${nameEn || ""}</p>
-                            <p style="font-size:12px;margin:0 0 4px">
-                              منشآت مرئية: <strong>${districtFacilities.length}</strong>
-                            </p>
-                            <p style="font-size:12px;margin:0 0 4px">
-                              مستوى الخطر: <strong>${districtRisk || "غير متأثر"}</strong>
-                            </p>
-                            <p style="font-size:11px;color:#6b7280;margin:0">
-                              مركز القسم: ${Number(centerLat).toFixed(4)}, ${Number(centerLon).toFixed(4)}
-                            </p>
+                          <div dir="rtl" style="min-width:180px">
+                            <strong>${name}</strong><br/>
+                            ${properties.adm1_name1 || properties.adm1_name || ""}<br/>
+                            ${properties.adm0_name1 || properties.adm0_name || ""}
                           </div>
                         `);
                       }}
@@ -907,26 +908,29 @@ const InfrastructurePage = () => {
                 </LayerGroup>
               </LayersControl.Overlay>
 
-              <LayersControl.Overlay name="الحدود الإدارية">
-                <LayerGroup key={`${filterStateKey}-admin`}>
-                  {adminBoundaries && (
+              <LayersControl.Overlay checked name="بيانات الاستخدام الأرضي">
+                <LayerGroup key={`${filterStateKey}-landuse`}>
+                  {landUseLayerData && landUseLayerData.features.length > 0 && (
                     <GeoJSON
-                      data={adminBoundaries}
-                      style={{
-                        color: "#0f766e",
-                        weight: 1.5,
-                        fillColor: "#14b8a6",
-                        fillOpacity: 0.08,
-                      }}
+                      data={landUseLayerData}
+                      style={getLandUseStyle}
                       onEachFeature={(feature, layer) => {
-                        const properties = feature?.properties || {};
-                        const name = properties.adm1_name || properties.adm1_name1 || "الإسكندرية";
-                        layer.bindPopup(`
-                          <div dir="rtl" class="font-arabic" style="min-width:160px">
-                            <h3 style="font-weight:700;margin:0 0 4px">${name}</h3>
-                            <p style="font-size:11px;color:#6b7280;margin:0">حدود إدارية معروضة من ملف GeoJSON المرتبط بالمشروع</p>
-                          </div>
-                        `);
+                        layer.bindPopup(getLandUsePopupHtml(feature));
+                      }}
+                    />
+                  )}
+                </LayerGroup>
+              </LayersControl.Overlay>
+
+              <LayersControl.Overlay checked name="نموذج ارتفاع سطح الأرض (DEM)">
+                <LayerGroup key="dem-layer">
+                  {demData && demData.features && demData.features.length > 0 && (
+                    <GeoJSON
+                      data={demData}
+                      style={getDemStyle}
+                      renderer={L.canvas({ padding: 0.5 })}
+                      onEachFeature={(feature, layer) => {
+                        layer.bindPopup(getDemPopupHtml(feature));
                       }}
                     />
                   )}
@@ -948,24 +952,28 @@ const InfrastructurePage = () => {
                     { key: "hospitals", label: "المستشفيات", facilities: facilitiesByType.hospitals },
                     { key: "transport", label: "النقل", facilities: facilitiesByType.transport },
                     { key: "utilities", label: "المرافق", facilities: facilitiesByType.utilities },
-                  ].filter((layer) => layer.facilities.length > 0).map((layer) => (
-                    <LayersControl.Overlay key={`${layer.key}-overlay`} name={layer.label}>
-                      <LayerGroup key={`${filterStateKey}-${layer.key}-facilities`} />
-                    </LayersControl.Overlay>
-                  ))}
+                  ]
+                    .filter((layer) => layer.facilities.length > 0)
+                    .map((layer) => (
+                      <LayersControl.Overlay key={`${layer.key}-overlay`} name={layer.label}>
+                        <LayerGroup key={`${filterStateKey}-${layer.key}-facilities`} />
+                      </LayersControl.Overlay>
+                    ))}
                   {[
                     { key: "ports", label: "الموانئ", facilities: facilitiesByType.ports },
                     { key: "hospitals", label: "المستشفيات", facilities: facilitiesByType.hospitals },
                     { key: "transport", label: "النقل", facilities: facilitiesByType.transport },
                     { key: "utilities", label: "المرافق", facilities: facilitiesByType.utilities },
-                  ].filter((layer) => layer.facilities.length > 0).map((layer) => (
-                    <FacilityOverlayLayer
-                      key={`${layer.key}-overlay-layer`}
-                      facilities={layer.facilities}
-                      visible={shouldRenderFacilityIcons}
-                      title={layer.label}
-                    />
-                  ))}
+                  ]
+                    .filter((layer) => layer.facilities.length > 0)
+                    .map((layer) => (
+                      <FacilityOverlayLayer
+                        key={`${layer.key}-overlay-layer`}
+                        facilities={layer.facilities}
+                        visible={shouldRenderFacilityIcons}
+                        title={layer.label}
+                      />
+                    ))}
                 </>
               )}
             </LayersControl>
@@ -1050,4 +1058,3 @@ const InfrastructurePage = () => {
 };
 
 export default InfrastructurePage;
-

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -8,10 +8,12 @@ import {
   LayersControl,
   LayerGroup,
   CircleMarker,
-  Tooltip
+  Tooltip,
+  GeoJSON,
+  useMapEvents
 } from "react-leaflet";
 import { useRiskStore } from "../store/riskStore";
-import { LatLngExpression } from "leaflet";
+import L, { LatLngExpression } from "leaflet";
 import { twMerge } from "tailwind-merge";
 
 // Enhanced GeoJSON-like polygons for Alexandria districts hugging the coastline for a more professional look
@@ -143,6 +145,79 @@ export const RiskMap = ({
 }: RiskMapProps) => {
   const { mapData, populationData, infrastructureData, isLoading, selectedScenario, selectedYear } =
     useRiskStore();
+
+  const [showDem, setShowDem] = useState(false);
+  const [demData, setDemData] = useState<any>(null);
+  const [loadingDem, setLoadingDem] = useState(false);
+
+  useEffect(() => {
+    if (showDem && !demData && !loadingDem) {
+      setLoadingDem(true);
+      const baseUrl = import.meta.env.BASE_URL || "/";
+      fetch(`${baseUrl}data/alexandria_DEM.geojson`)
+        .then((res) => {
+          if (!res.ok) throw new Error(`Status: ${res.status}`);
+          return res.json();
+        })
+        .then((data) => {
+          setDemData(data);
+          setLoadingDem(false);
+        })
+        .catch((err) => {
+          console.error("Failed to load DEM geojson:", err);
+          setLoadingDem(false);
+        });
+    }
+  }, [showDem, demData, loadingDem]);
+
+  const canvasRenderer = useMemo(() => L.canvas(), []);
+
+  const getDemColor = (elev: number) => {
+    if (elev <= 0) return "#2563EB"; // Blue (below or at sea level)
+    if (elev <= 0.5) return "#EF4444"; // Red (very low, critical risk)
+    if (elev <= 1.0) return "#F97316"; // Orange (low, high risk)
+    if (elev <= 2.0) return "#FBBF24"; // Yellow (medium, moderate risk)
+    if (elev <= 5.0) return "#34D399"; // Light Green (safe, low risk)
+    return "#059669"; // Green (high ground, safe)
+  };
+
+  const demStyle = (feature: any) => {
+    const elev = feature?.properties?.elevation_m ?? 0;
+    return {
+      fillColor: getDemColor(elev),
+      fillOpacity: 0.45,
+      weight: 0, // performance optimization
+      color: "transparent",
+      renderer: canvasRenderer,
+    };
+  };
+
+  const onEachDemFeature = (feature: any, layer: any) => {
+    const elev = feature?.properties?.elevation_m;
+    if (elev !== undefined) {
+      layer.bindPopup(
+        `<div class="font-arabic text-right text-xs leading-5" dir="rtl">
+           <strong>منسوب الارتفاع:</strong> ${elev.toFixed(2)} متر
+         </div>`
+      );
+    }
+  };
+
+  const MapEvents = () => {
+    useMapEvents({
+      overlayadd(e) {
+        if (e.name === "الارتفاعات الرقمية (DEM)") {
+          setShowDem(true);
+        }
+      },
+      overlayremove(e) {
+        if (e.name === "الارتفاعات الرقمية (DEM)") {
+          setShowDem(false);
+        }
+      },
+    });
+    return null;
+  };
 
   const normalizeRisk = (
     riskLevel?: string,
@@ -350,6 +425,49 @@ export const RiskMap = ({
         </div>
       )}
 
+      {loadingDem && (
+        <div className="absolute top-14 left-4 bg-white/95 border border-gray-200 rounded-lg px-3 py-1.5 z-[1000] flex items-center gap-2 shadow-md backdrop-blur-sm">
+          <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-blue-600 animate-infinite"></div>
+          <span className="text-[11px] text-gray-700 font-bold font-arabic">
+            جاري تحميل بيانات الارتفاعات الرقمية...
+          </span>
+        </div>
+      )}
+
+      {showDem && demData && (
+        <div className="absolute bottom-4 right-4 bg-white/95 border border-gray-200 rounded-xl p-3 z-[1000] shadow-lg max-w-[200px] font-arabic text-right leading-5" dir="rtl">
+          <h4 className="text-[11px] font-bold text-gray-900 mb-2 border-b border-gray-100 pb-1">
+            مستويات الارتفاع الرقمية (DEM)
+          </h4>
+          <div className="space-y-1 text-[10px]">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-sm block shrink-0" style={{ backgroundColor: "#2563EB" }}></span>
+              <span className="text-gray-700">≤ 0 م (تحت مستوى البحر)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-sm block shrink-0" style={{ backgroundColor: "#EF4444" }}></span>
+              <span className="text-gray-700">0.1 - 0.5 م (خطورة فائقة)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-sm block shrink-0" style={{ backgroundColor: "#F97316" }}></span>
+              <span className="text-gray-700">0.6 - 1.0 م (خطورة مرتفعة)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-sm block shrink-0" style={{ backgroundColor: "#FBBF24" }}></span>
+              <span className="text-gray-700">1.1 - 2.0 م (خطورة متوسطة)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-sm block shrink-0" style={{ backgroundColor: "#34D399" }}></span>
+              <span className="text-gray-700">2.1 - 5.0 م (خطورة منخفضة)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-sm block shrink-0" style={{ backgroundColor: "#059669" }}></span>
+              <span className="text-gray-700">&gt; 5.0 م (مناطق آمنة)</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <MapContainer
         center={position}
         zoom={11}
@@ -358,6 +476,7 @@ export const RiskMap = ({
         zoomControl={false}
       >
         <ZoomControl position="bottomleft" />
+        <MapEvents />
 
         <LayersControl position="topright">
           <LayersControl.BaseLayer checked name="خريطة الطرق">
@@ -481,6 +600,18 @@ export const RiskMap = ({
                   </CircleMarker>
                 );
               })}
+            </LayerGroup>
+          </LayersControl.Overlay>
+
+          <LayersControl.Overlay name="الارتفاعات الرقمية (DEM)">
+            <LayerGroup>
+              {demData && (
+                <GeoJSON
+                  data={demData}
+                  style={demStyle}
+                  onEachFeature={onEachDemFeature}
+                />
+              )}
             </LayerGroup>
           </LayersControl.Overlay>
         </LayersControl>

@@ -11,6 +11,7 @@ import { ToastProvider } from "./contexts/ToastContext";
 // Lazy loading components for better performance
 const HomePage = lazy(() => import("./components/HomePage"));
 const PredictionsPage = lazy(() => import("./components/PredictionsPage"));
+const  AnalyticsPage = lazy(() => import("./components/AnalyticsPage"));
 const InfrastructurePage = lazy(() => import("./components/InfrastructurePage"));
 
 // Loading Component
@@ -30,9 +31,9 @@ const AppRoutes = () => {
         <Routes>
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/login" element={<Navigate to="/home" replace />} />
-          <Route path="/register" element={<Navigate to="/home" replace />} />
-
+            <Route path="/register" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<HomePage />} />
+            <Route path="/Analytics" element={<AnalyticsPage />} />
           <Route path="/infrastructure" element={<InfrastructurePage />} />
           <Route path="/predictions" element={<PredictionsPage />} />
 
