@@ -3,6 +3,7 @@ import Header from "./Header";
 import {
   MapContainer,
   Marker,
+  TileLayer,
   Popup,
   ZoomControl,
   Circle,
@@ -150,7 +151,7 @@ const getDemStyle = (feature) => {
     color,
     weight: 0,
     fillColor: color,
-    fillOpacity: 0.55,
+    fillOpacity: 0,
     stroke: false,
   };
 };
@@ -791,26 +792,6 @@ const InfrastructurePage = () => {
             </div>
           </div>
 
-          <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-            <label className="flex items-center justify-between cursor-pointer">
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={showFacilityIcons}
-                  onChange={() => {
-                    setShowFacilityIcons((value) => !value);
-                    setMapRenderVersion((value) => value + 1);
-                  }}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                />
-                <span className="text-sm font-medium text-gray-700">عرض الرموز على الخريطة</span>
-              </div>
-              <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${showFacilityIcons ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"}`}>
-                {showFacilityIcons ? "مفعّل" : "مغلق"}
-              </span>
-            </label>
-          </div>
-
           <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
             <h3 className="text-gray-500 text-xs font-bold uppercase mb-2">ملخص التأثير</h3>
             <div className="flex items-end gap-2 mb-1">
@@ -875,25 +856,33 @@ const InfrastructurePage = () => {
             className="flex-1 w-full h-full z-0"
             zoomControl={false}
           >
-            <ZoomControl position="bottomright" />
-            <LayersControl position="bottomleft">
-              <LayersControl.Overlay checked name="حدود الأقسام الإدارية (ADM2)">
-                <LayerGroup key={`${filterStateKey}-admin2`}>
-                  {admin2Boundaries && (
-                    <GeoJSON
-                      data={admin2Boundaries}
-                      style={{
-                        color: "#2563eb",
-                        weight: 1.5,
-                        fillColor: "#3b82f6",
-                        fillOpacity: 0.12,
-                      }}
-                      onEachFeature={(feature, layer) => {
-                        const properties = feature?.properties || {};
-                        const name =
-                          properties.adm2_name1 ||
-                          properties.adm2_ref_name ||
-                          properties.adm2_name ||
+          <ZoomControl position="bottomright" />
+          <LayersControl position="bottomleft">
+            <LayersControl.BaseLayer
+              checked name="OpenStreetMap Standard">
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                maxZoom={19}
+              />
+            </LayersControl.BaseLayer>
+            <LayersControl.Overlay checked name="حدود الأقسام الإدارية (ADM2)">
+              <LayerGroup key={`${filterStateKey}-admin2`}>
+                {admin2Boundaries && (
+                  <GeoJSON
+                    data={admin2Boundaries}
+                    style={{
+                      color: "#2563eb",
+                      weight: 1.5,
+                      fillColor: "#3b82f6",
+                      fillOpacity: 0.12,
+                    }}
+                    onEachFeature={(feature, layer) => {
+                      const properties = feature?.properties || {};
+                      const name =
+                        properties.adm2_name1 ||
+                        properties.adm2_ref_name ||
+                        properties.adm2_name ||
                           "قسم";
                         layer.bindPopup(`
                           <div dir="rtl" style="min-width:180px">
@@ -902,69 +891,69 @@ const InfrastructurePage = () => {
                             ${properties.adm0_name1 || properties.adm0_name || ""}
                           </div>
                         `);
-                      }}
-                    />
-                  )}
-                </LayerGroup>
-              </LayersControl.Overlay>
-
-              <LayersControl.Overlay checked name="بيانات الاستخدام الأرضي">
-                <LayerGroup key={`${filterStateKey}-landuse`}>
-                  {landUseLayerData && landUseLayerData.features.length > 0 && (
-                    <GeoJSON
-                      data={landUseLayerData}
-                      style={getLandUseStyle}
-                      onEachFeature={(feature, layer) => {
-                        layer.bindPopup(getLandUsePopupHtml(feature));
-                      }}
-                    />
-                  )}
-                </LayerGroup>
-              </LayersControl.Overlay>
-
-              <LayersControl.Overlay checked name="نموذج ارتفاع سطح الأرض (DEM)">
-                <LayerGroup key="dem-layer">
-                  {demData && demData.features && demData.features.length > 0 && (
-                    <GeoJSON
-                      data={demData}
-                      style={getDemStyle}
-                      renderer={L.canvas({ padding: 0.5 })}
-                      onEachFeature={(feature, layer) => {
-                        layer.bindPopup(getDemPopupHtml(feature));
-                      }}
-                    />
-                  )}
-                </LayerGroup>
-              </LayersControl.Overlay>
-
-              {shouldRenderFacilityIcons && (
-                <>
-                  <LayersControl.Overlay checked name="المواقع (الكل)">
-                    <LayerGroup key={`${filterStateKey}-${shouldRenderFacilityIcons}-all-facilities`} />
-                  </LayersControl.Overlay>
-                  <FacilityOverlayLayer
-                    facilities={filteredFacilities}
-                    visible={shouldRenderFacilityIcons}
-                    title="المواقع (الكل)"
+                    }}
                   />
-                  {[
-                    { key: "ports", label: "الموانئ", facilities: facilitiesByType.ports },
-                    { key: "hospitals", label: "المستشفيات", facilities: facilitiesByType.hospitals },
-                    { key: "transport", label: "النقل", facilities: facilitiesByType.transport },
-                    { key: "utilities", label: "المرافق", facilities: facilitiesByType.utilities },
-                  ]
+                )}
+              </LayerGroup>
+            </LayersControl.Overlay>
+            
+            <LayersControl.Overlay checked name="بيانات الاستخدام الأرضي">
+              <LayerGroup key={`${filterStateKey}-landuse`}>
+                {landUseLayerData && landUseLayerData.features.length > 0 && (
+                  <GeoJSON
+                    data={landUseLayerData}
+                    style={getLandUseStyle}
+                    onEachFeature={(feature, layer) => {
+                      layer.bindPopup(getLandUsePopupHtml(feature));
+                    }}
+                  />
+                )}
+              </LayerGroup>
+            </LayersControl.Overlay>
+            
+            <LayersControl.Overlay checked name="نموذج ارتفاع سطح الأرض (DEM)">
+              <LayerGroup key="dem-layer">
+                {demData && demData.features && demData.features.length > 0 && (
+                  <GeoJSON
+                    data={demData}
+                    style={getDemStyle}
+                    renderer={L.canvas({ padding: 0.5 })}
+                    onEachFeature={(feature, layer) => {
+                      layer.bindPopup(getDemPopupHtml(feature));
+                    }}
+                  />
+                )}
+              </LayerGroup>
+            </LayersControl.Overlay>
+            
+            {shouldRenderFacilityIcons && (
+              <>
+              <LayersControl.Overlay checked name="المواقع (الكل)">
+                <LayerGroup key={`${filterStateKey}-${shouldRenderFacilityIcons}-all-facilities`} />
+                  </LayersControl.Overlay>
+                    <FacilityOverlayLayer
+                      facilities={filteredFacilities}
+                      visible={shouldRenderFacilityIcons}
+                      title="المواقع (الكل)"
+                    />
+                    {[  
+                      { key: "ports", label: "الموانئ", facilities: facilitiesByType.ports },
+                      { key: "hospitals", label: "المستشفيات", facilities: facilitiesByType.hospitals },
+                      { key: "transport", label: "النقل", facilities: facilitiesByType.transport },
+                      { key: "utilities", label: "المرافق", facilities: facilitiesByType.utilities },
+                    ]
                     .filter((layer) => layer.facilities.length > 0)
                     .map((layer) => (
                       <LayersControl.Overlay key={`${layer.key}-overlay`} name={layer.label}>
                         <LayerGroup key={`${filterStateKey}-${layer.key}-facilities`} />
-                      </LayersControl.Overlay>
+                          </LayersControl.Overlay>
                     ))}
-                  {[
-                    { key: "ports", label: "الموانئ", facilities: facilitiesByType.ports },
-                    { key: "hospitals", label: "المستشفيات", facilities: facilitiesByType.hospitals },
-                    { key: "transport", label: "النقل", facilities: facilitiesByType.transport },
-                    { key: "utilities", label: "المرافق", facilities: facilitiesByType.utilities },
-                  ]
+                    {[
+                      { key: "ports", label: "الموانئ", facilities: facilitiesByType.ports },
+                      { key: "hospitals", label: "المستشفيات", facilities: facilitiesByType.hospitals },
+                      { key: "transport", label: "النقل", facilities: facilitiesByType.transport },
+                      { key: "utilities", label: "المرافق", facilities: facilitiesByType.utilities },
+                    ]
                     .filter((layer) => layer.facilities.length > 0)
                     .map((layer) => (
                       <FacilityOverlayLayer
@@ -974,19 +963,19 @@ const InfrastructurePage = () => {
                         title={layer.label}
                       />
                     ))}
-                </>
-              )}
-            </LayersControl>
+                    </>
+                          )}
+              </LayersControl>
 
             <FitFilteredFacilitiesBounds key={`${filterStateKey}-${mapRenderVersion}`} facilities={filteredFacilities} />
 
-            {filteredFacilities.length === 0 && (
-              <div className="leaflet-top leaflet-left">
-                <div className="leaflet-control bg-white border border-gray-200 rounded-lg px-3 py-2 shadow text-xs font-bold text-gray-600 mt-2 ml-2">
-                  لا توجد منشآت مطابقة للتصفية الحالية
+              {filteredFacilities.length === 0 && (
+                <div className="leaflet-top leaflet-left">
+                  <div className="leaflet-control bg-white border border-gray-200 rounded-lg px-3 py-2 shadow text-xs font-bold text-gray-600 mt-2 ml-2">
+                   لا توجد منشآت مطابقة للتصفية الحالية
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </MapContainer>
 
           <div className="absolute bottom-4 right-4 z-[400] bg-white/95 backdrop-blur-md border border-gray-200 rounded-xl p-3 shadow-lg text-xs text-gray-700 space-y-2 max-w-[250px]">

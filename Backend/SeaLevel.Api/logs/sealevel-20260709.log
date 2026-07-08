@@ -1,0 +1,10 @@
+2026-07-09 00:13:46.182 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5219/api/dashboard?scenario=SSP245&year=2030 - null null
+2026-07-09 00:13:46.183 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5219/api/infrastructure?scenario=SSP245&year=2030 - null null
+2026-07-09 00:13:46.231 +03:00 [INF] Executing endpoint 'SeaLevel.Api.Controllers.DashboardController.Get (SeaLevel.Api)'
+2026-07-09 00:13:46.231 +03:00 [INF] Executing endpoint 'SeaLevel.Api.Controllers.InfrastructureController.Get (SeaLevel.Api)'
+2026-07-09 00:13:46.232 +03:00 [INF] Route matched with {action = "Get", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[SeaLevel.Application.DTOs.Dashboard.DashboardResponse]] Get(SeaLevel.Application.DTOs.Queries.ScenarioYearQuery, System.Threading.CancellationToken) on controller SeaLevel.Api.Controllers.DashboardController (SeaLevel.Api).
+2026-07-09 00:13:46.234 +03:00 [INF] Route matched with {action = "Get", controller = "Infrastructure"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[SeaLevel.Application.DTOs.Infrastructure.InfrastructureResponse]] Get(SeaLevel.Application.DTOs.Queries.InfrastructureQuery, System.Threading.CancellationToken) on controller SeaLevel.Api.Controllers.InfrastructureController (SeaLevel.Api).
+2026-07-09 00:13:46.238 +03:00 [INF] Start processing HTTP request POST http://localhost:8000/forecast
+2026-07-09 00:13:46.240 +03:00 [INF] Start processing HTTP request POST http://localhost:8000/forecast
+2026-07-09 00:13:46.242 +03:00 [INF] Sending HTTP request POST http://localhost:8000/forecast
+2026-07-09 00:13:46.243 +03:00 [INF] Sending HTTP request POST http://localhost:8000/forecast

@@ -51,7 +51,7 @@ const Header = ({ active = "home" }) => {
                 : "text-gray-500 hover:text-blue-600"
             }`}
           >
-            التنبؤات
+            تدخلات عاجله
           </Link>
           <Link
             to="/Analytics"
@@ -71,7 +71,7 @@ const Header = ({ active = "home" }) => {
                 : "text-gray-500 hover:text-blue-600"
             }`}
           >
-            البنية التحتية
+            تخطيط مستقبلي
           </Link>
         </nav>
 
@@ -86,13 +86,6 @@ const Header = ({ active = "home" }) => {
 
       {/* Right: Ministry Logo & Title */}
       <div className="flex items-center gap-3">
-        <button
-          onClick={handleLogout}
-          className="hidden md:inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-gray-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50 text-xs font-bold transition-colors"
-        >
-          <LogOut className="w-4 h-4" />
-          تسجيل الخروج
-        </button>
         <div className="text-right">
           <h2 className="text-xs font-bold text-gray-900">AlexGuard</h2>
           <p className="text-[10px] text-gray-500">نظام إدارة تنبؤات الفيضان</p>
