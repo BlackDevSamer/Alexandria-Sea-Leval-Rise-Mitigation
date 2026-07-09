@@ -63,9 +63,10 @@ export const AuthProvider = ({ children }) => {
       token: session?.token ?? null,
       user: session
         ? {
-            email: session.email,
-            username: session.username,
-          }
+          email: session.email,
+          username: session.username,
+          roles: session.roles || [],
+        }
         : null,
       isAuthenticated: Boolean(session?.token),
       isAuthReady: true,

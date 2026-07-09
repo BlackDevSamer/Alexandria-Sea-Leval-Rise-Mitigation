@@ -6,5 +6,7 @@ public interface IForecastLogRepository
 {
     Task AddAsync(ForecastLog log, CancellationToken cancellationToken = default);
 
+    Task<IEnumerable<ForecastLog>> GetAllAsync(CancellationToken cancellationToken = default);
+
     Task<IEnumerable<ForecastLog>> GetByUserAsync(string userId, CancellationToken cancellationToken = default);
 }

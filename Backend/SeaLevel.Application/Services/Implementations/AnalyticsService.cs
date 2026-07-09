@@ -1,11 +1,14 @@
+using SeaLevel.Core.Entities;
 using SeaLevel.Application.DTOs.Analytics;
 using SeaLevel.Application.DTOs.Forecast;
 using SeaLevel.Application.DTOs.Weather;
 using SeaLevel.Application.Services.Helpers;
 using SeaLevel.Application.Services.Interfaces;
+using SeaLevel.Core.Interfaces;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 using System;
 
 namespace SeaLevel.Application.Services.Implementations;
@@ -14,11 +17,22 @@ public class AnalyticsService : IAnalyticsService
 {
     private readonly INasaPowerClient _nasaPowerClient;
     private readonly IMlForecastClient _mlForecastClient;
+    private readonly IForecastLogRepository _forecastLogRepository;
+    private readonly ILongTermScenarioRepository _scenarioRepository;
+    private readonly ILandUseFeatureRepository _landUseRepository;
 
-    public AnalyticsService(INasaPowerClient nasaPowerClient, IMlForecastClient mlForecastClient)
+    public AnalyticsService(
+        INasaPowerClient nasaPowerClient, 
+        IMlForecastClient mlForecastClient,
+        IForecastLogRepository forecastLogRepository, 
+        ILongTermScenarioRepository scenarioRepository,
+        ILandUseFeatureRepository landUseRepository)
     {
         _nasaPowerClient = nasaPowerClient;
         _mlForecastClient = mlForecastClient;
+        _forecastLogRepository = forecastLogRepository;
+        _scenarioRepository = scenarioRepository;
+        _landUseRepository = landUseRepository;
     }
 
     public async Task<AnalyticsChartsResponse> GetChartsAsync(
@@ -45,15 +59,24 @@ public class AnalyticsService : IAnalyticsService
 
         double basePredictedSeaLevel = RiskMappingHelper.GetBasePredictedSeaLevel(forecast);
 
+        var dbScenarios = await _scenarioRepository.GetAllAsync(cancellationToken);
+        var dbFeatures = await _landUseRepository.GetAllAsync(cancellationToken);
+
         List<ExposureDataItem> exposureData = new();
         List<int> years = new() { 2030, 2050, 2070, 2100 };
         foreach (int targetYear in years)
         {
-            double adjusted1 = RiskMappingHelper.ApplyScenarioAndYearAdjustment(basePredictedSeaLevel, "SSP126", targetYear);
-            double adjusted5 = RiskMappingHelper.ApplyScenarioAndYearAdjustment(basePredictedSeaLevel, "SSP585", targetYear);
+            var ssp1 = dbScenarios.FirstOrDefault(s => s.Scenario.Equals("SSP126", StringComparison.OrdinalIgnoreCase) && s.Year == targetYear);
+            var ssp5 = dbScenarios.FirstOrDefault(s => s.Scenario.Equals("SSP585", StringComparison.OrdinalIgnoreCase) && s.Year == targetYear);
+
+            double rise1 = ssp1 != null ? ssp1.RiseInMillimeters : 0.0;
+            double rise5 = ssp5 != null ? ssp5.RiseInMillimeters : 0.0;
+
+            double adjusted1 = basePredictedSeaLevel + rise1;
+            double adjusted5 = basePredictedSeaLevel + rise5;
             
-            var proj1 = ProjectionEngine.Calculate(adjusted1);
-            var proj5 = ProjectionEngine.Calculate(adjusted5);
+            var proj1 = ProjectionEngine.Calculate(adjusted1, dbFeatures);
+            var proj5 = ProjectionEngine.Calculate(adjusted5, dbFeatures);
 
             exposureData.Add(new ExposureDataItem
             {
@@ -63,8 +86,10 @@ public class AnalyticsService : IAnalyticsService
             });
         }
 
-        double currentAdjusted = RiskMappingHelper.ApplyScenarioAndYearAdjustment(basePredictedSeaLevel, scenario, year);
-        ProjectionResult currentProjection = ProjectionEngine.Calculate(currentAdjusted);
+        var currentSsp = dbScenarios.FirstOrDefault(s => s.Scenario.Equals(scenario, StringComparison.OrdinalIgnoreCase) && s.Year == year);
+        double currentRise = currentSsp != null ? currentSsp.RiseInMillimeters : 0.0;
+        double currentAdjusted = basePredictedSeaLevel + currentRise;
+        ProjectionResult currentProjection = ProjectionEngine.Calculate(currentAdjusted, dbFeatures);
         double vulnerabilityIndex = CalculateVulnerabilityIndex(currentProjection, year);
         string vulnerabilityLevel = GetVulnerabilityLevel(vulnerabilityIndex);
 

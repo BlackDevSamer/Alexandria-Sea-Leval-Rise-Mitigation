@@ -1,25 +1,31 @@
 {
   "format": 1,
   "restore": {
-    "D:\\WorkPlace\\GradProject\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Application\\SeaLevel.Application.csproj": {}
+    "C:\\Users\\lyr1csan\\Desktop\\robotics\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Application\\SeaLevel.Application.csproj": {}
   },
   "projects": {
-    "D:\\WorkPlace\\GradProject\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Application\\SeaLevel.Application.csproj": {
+    "C:\\Users\\lyr1csan\\Desktop\\robotics\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Application\\SeaLevel.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\WorkPlace\\GradProject\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Application\\SeaLevel.Application.csproj",
+        "projectUniqueName": "C:\\Users\\lyr1csan\\Desktop\\robotics\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Application\\SeaLevel.Application.csproj",
         "projectName": "SeaLevel.Application",
-        "projectPath": "D:\\WorkPlace\\GradProject\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Application\\SeaLevel.Application.csproj",
-        "packagesPath": "C:\\Users\\Samer\\.nuget\\packages\\",
-        "outputPath": "D:\\WorkPlace\\GradProject\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Application\\obj\\",
+        "projectPath": "C:\\Users\\lyr1csan\\Desktop\\robotics\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Application\\SeaLevel.Application.csproj",
+        "packagesPath": "C:\\Users\\lyr1csan\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\lyr1csan\\Desktop\\robotics\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Application\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\Samer\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\lyr1csan\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -27,8 +33,8 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\WorkPlace\\GradProject\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Core\\SeaLevel.Core.csproj": {
-                "projectPath": "D:\\WorkPlace\\GradProject\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Core\\SeaLevel.Core.csproj"
+              "C:\\Users\\lyr1csan\\Desktop\\robotics\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Core\\SeaLevel.Core.csproj": {
+                "projectPath": "C:\\Users\\lyr1csan\\Desktop\\robotics\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Core\\SeaLevel.Core.csproj"
               }
             }
           }
@@ -496,22 +502,28 @@
         }
       }
     },
-    "D:\\WorkPlace\\GradProject\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Core\\SeaLevel.Core.csproj": {
+    "C:\\Users\\lyr1csan\\Desktop\\robotics\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Core\\SeaLevel.Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\WorkPlace\\GradProject\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Core\\SeaLevel.Core.csproj",
+        "projectUniqueName": "C:\\Users\\lyr1csan\\Desktop\\robotics\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Core\\SeaLevel.Core.csproj",
         "projectName": "SeaLevel.Core",
-        "projectPath": "D:\\WorkPlace\\GradProject\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Core\\SeaLevel.Core.csproj",
-        "packagesPath": "C:\\Users\\Samer\\.nuget\\packages\\",
-        "outputPath": "D:\\WorkPlace\\GradProject\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Core\\obj\\",
+        "projectPath": "C:\\Users\\lyr1csan\\Desktop\\robotics\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Core\\SeaLevel.Core.csproj",
+        "packagesPath": "C:\\Users\\lyr1csan\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\lyr1csan\\Desktop\\robotics\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Core\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\Samer\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\lyr1csan\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {

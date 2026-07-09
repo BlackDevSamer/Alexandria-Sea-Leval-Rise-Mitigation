@@ -43,7 +43,9 @@ public class AuthService : IAuthService
             throw new ValidationException(errors);
         }
 
-        return BuildAuthResponse(user);
+        await _userManager.AddToRoleAsync(user, "User");
+
+        return await BuildAuthResponseAsync(user);
     }
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
@@ -60,10 +62,10 @@ public class AuthService : IAuthService
             throw new UnauthorizedAccessException("Invalid email or password.");
         }
 
-        return BuildAuthResponse(user);
+        return await BuildAuthResponseAsync(user);
     }
 
-    private AuthResponse BuildAuthResponse(ApplicationUser user)
+    private async Task<AuthResponse> BuildAuthResponseAsync(ApplicationUser user)
     {
         string secret = _configuration["Jwt:Secret"]
             ?? throw new InvalidOperationException("JWT secret is missing from configuration.");
@@ -77,6 +79,8 @@ public class AuthService : IAuthService
         int expiryDays = _configuration.GetValue<int?>("Jwt:ExpiryDays") ?? 7;
         DateTime expiresAtUtc = DateTime.UtcNow.AddDays(expiryDays);
 
+        var userRoles = await _userManager.GetRolesAsync(user);
+
         List<Claim> claims = new()
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id),
@@ -84,6 +88,11 @@ public class AuthService : IAuthService
             new Claim(ClaimTypes.Name, user.UserName ?? string.Empty),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N"))
         };
+
+        foreach (var role in userRoles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
         SymmetricSecurityKey securityKey = new(Encoding.UTF8.GetBytes(secret));
         SigningCredentials credentials = new(securityKey, SecurityAlgorithms.HmacSha256);
@@ -102,7 +111,8 @@ public class AuthService : IAuthService
             Token = token,
             Email = user.Email ?? string.Empty,
             Username = user.UserName ?? string.Empty,
-            ExpiresAtUtc = expiresAtUtc
+            ExpiresAtUtc = expiresAtUtc,
+            Roles = userRoles.ToArray()
         };
     }
 }

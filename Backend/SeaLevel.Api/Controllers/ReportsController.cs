@@ -30,4 +30,17 @@ public class ReportsController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpGet("export")]
+    public async Task<IActionResult> Export(
+        [FromQuery] ScenarioYearQuery query,
+        CancellationToken cancellationToken)
+    {
+        byte[] csvBytes = await _reportService.ExportPredictionsCsvAsync(
+            query.Scenario,
+            query.Year,
+            cancellationToken: cancellationToken);
+
+        return File(csvBytes, "text/csv", $"predictions-data-{query.Scenario}-{query.Year}.csv");
+    }
 }

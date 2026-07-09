@@ -753,6 +753,23 @@ const argentIntervention = () => {
 
       <main className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         <aside className="w-full lg:w-80 bg-white border-l border-gray-200 p-6 overflow-y-auto z-10 shadow-lg">
+          
+          <div className="mb-8 bg-gray-50 p-4 rounded-xl border border-gray-100 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-bold text-gray-800">نقاط المنشآت الحيوية</h2>
+              <p className="text-[10px] text-gray-500 mt-1">عرض مواقع البنية التحتية والمرافق</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                className="sr-only peer" 
+                checked={showFacilityIcons}
+                onChange={() => setShowFacilityIcons(!showFacilityIcons)}
+              />
+              <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+
           <div className="mb-8">
             <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
               فلاتر الاستخدام الأرضي
@@ -919,6 +936,7 @@ const argentIntervention = () => {
                 <LayerGroup key={`${filterStateKey}-landuse`}>
                   {landUseLayerData && landUseLayerData.features.length > 0 && (
                     <GeoJSON
+                      key={`${filterStateKey}-landuse-geojson`}
                       data={landUseLayerData}
                       style={getLandUseStyle}
                       onEachFeature={(feature, layer) => {

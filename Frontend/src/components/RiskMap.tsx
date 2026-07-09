@@ -246,10 +246,10 @@ export const RiskMap = ({
   };
 
   const riskColor = (risk: "critical" | "high" | "medium" | "low") => {
-    if (risk === "critical") return "#EF4444";
-    if (risk === "high") return "#F59E0B";
-    if (risk === "medium") return "#FCD34D";
-    return "#10B981";
+    if (risk === "critical") return "#0D47A1";
+    if (risk === "high") return "#1976D2";
+    if (risk === "medium") return "#64B5F6";
+    return "#E3F2FD";
   };
 
   const districtPathOptions = (risk: "critical" | "high" | "medium" | "low") => {
@@ -258,8 +258,8 @@ export const RiskMap = ({
     if (risk === "critical") {
       return {
         ...baseOptions,
-        color: "#991B1B",
-        fillColor: "#EF4444",
+        color: "#0A3780",
+        fillColor: "#0D47A1",
         fillOpacity: 0.35,
         weight: 2.8,
         dashArray: "8, 8",
@@ -270,8 +270,8 @@ export const RiskMap = ({
     if (risk === "high") {
       return {
         ...baseOptions,
-        color: "#B45309",
-        fillColor: "#F59E0B",
+        color: "#135BA1",
+        fillColor: "#1976D2",
         fillOpacity: 0.28,
         weight: 2.4,
         opacity: 0.92,
@@ -281,8 +281,8 @@ export const RiskMap = ({
     if (risk === "medium") {
       return {
         ...baseOptions,
-        color: "#A16207",
-        fillColor: "#FCD34D",
+        color: "#4A8ABF",
+        fillColor: "#64B5F6",
         fillOpacity: 0.22,
         weight: 2.0,
         opacity: 0.9,
@@ -291,8 +291,8 @@ export const RiskMap = ({
 
     return {
       ...baseOptions,
-      color: "#047857",
-      fillColor: "#10B981",
+      color: "#A6C1DB",
+      fillColor: "#E3F2FD",
       fillOpacity: 0.18,
       weight: 1.8,
       opacity: 0.88,

@@ -70,6 +70,7 @@ export interface AuthResponse {
   email: string;
   username: string;
   expiresAtUtc: string;
+  roles?: string[];
 }
 
 export interface AuthSession {
@@ -77,6 +78,7 @@ export interface AuthSession {
   email: string;
   username: string;
   expiresAtUtc: string;
+  roles?: string[];
 }
 
 export interface LoginPayload {
@@ -178,6 +180,7 @@ function readStoredSession(): AuthSession | null {
         email: parsed.email,
         username: parsed.username,
         expiresAtUtc: parsed.expiresAtUtc,
+        roles: parsed.roles,
       };
     }
 
@@ -218,6 +221,7 @@ function toAuthSession(payload: AuthResponse): AuthSession {
     email: payload.email,
     username: payload.username,
     expiresAtUtc: payload.expiresAtUtc,
+    roles: payload.roles,
   };
 }
 
@@ -259,7 +263,7 @@ async function requestJson<T>(
     });
   };
 
-  const token = requiresAuth ? getActiveToken() : null;
+  const token = getActiveToken();
   if (requiresAuth && !token) {
     throw new Error("Authentication required. Please login first.");
   }
@@ -558,5 +562,51 @@ export const dataService = {
     return requestJson<ReportStatisticsResponse>(
       `/reports/statistics?scenario=${scenario}&year=${year}`,
     );
+  },
+
+  exportReportCsv: async (
+    scenario: ScenarioCode,
+    year: Year,
+  ): Promise<Blob> => {
+    const token = getActiveToken();
+    const headers = new Headers();
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+    const response = await fetch(
+      `${API_BASE_URL}/reports/export?scenario=${scenario}&year=${year}`,
+      { headers }
+    );
+    if (!response.ok) {
+      throw new Error("Failed to export predictions CSV");
+    }
+    return response.blob();
+  },
+
+  getUsers: async (): Promise<any[]> => {
+    return requestJson<any[]>("/users", {}, true);
+  },
+
+  deleteUser: async (id: string): Promise<void> => {
+    return requestJson<void>(`/users/${id}`, { method: "DELETE" }, true);
+  },
+
+  updateProfile: async (payload: { username: string }): Promise<void> => {
+    return requestJson<void>(
+      "/users/profile",
+      {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      },
+      true,
+    );
+  },
+
+  getMyForecastLogs: async (): Promise<any[]> => {
+    return requestJson<any[]>("/forecast-logs/me", {}, true);
+  },
+
+  getAllForecastLogs: async (): Promise<any[]> => {
+    return requestJson<any[]>("/forecast-logs", {}, true);
   },
 };

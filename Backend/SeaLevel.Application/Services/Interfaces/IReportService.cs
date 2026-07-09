@@ -10,4 +10,9 @@ public interface IReportService
         DateTime? from = null,
         DateTime? to = null,
         CancellationToken cancellationToken = default);
+
+    Task<byte[]> ExportPredictionsCsvAsync(
+        string scenario,
+        int year,
+        CancellationToken cancellationToken = default);
 }

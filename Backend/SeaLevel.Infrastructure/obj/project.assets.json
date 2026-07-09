@@ -38,6 +38,35 @@
           }
         }
       },
+      "ExcelDataReader/3.9.0": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/ExcelDataReader.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/ExcelDataReader.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
+      "ExcelDataReader.DataSet/3.9.0": {
+        "type": "package",
+        "dependencies": {
+          "ExcelDataReader": "3.9.0"
+        },
+        "compile": {
+          "lib/net8.0/ExcelDataReader.DataSet.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/ExcelDataReader.DataSet.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
       "FluentValidation/12.0.0": {
         "type": "package",
         "compile": {
@@ -1130,6 +1159,56 @@
         "lib/net8.0/Azure.Identity.xml",
         "lib/netstandard2.0/Azure.Identity.dll",
         "lib/netstandard2.0/Azure.Identity.xml"
+      ]
+    },
+    "ExcelDataReader/3.9.0": {
+      "sha512": "3lEkUzG67UWPYj/xlX5Hua3MeQQktnK0B7WGzDjLpdJpBtct7szX0E4WB3Kl6C/8bNnbkyT2eO0FSPV+9CCemw==",
+      "type": "package",
+      "path": "exceldatareader/3.9.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "ExcelDataReader.png",
+        "README.md",
+        "exceldatareader.3.9.0.nupkg.sha512",
+        "exceldatareader.nuspec",
+        "lib/net462/ExcelDataReader.dll",
+        "lib/net462/ExcelDataReader.pdb",
+        "lib/net462/ExcelDataReader.xml",
+        "lib/net8.0/ExcelDataReader.dll",
+        "lib/net8.0/ExcelDataReader.pdb",
+        "lib/net8.0/ExcelDataReader.xml",
+        "lib/netstandard2.0/ExcelDataReader.dll",
+        "lib/netstandard2.0/ExcelDataReader.pdb",
+        "lib/netstandard2.0/ExcelDataReader.xml",
+        "lib/netstandard2.1/ExcelDataReader.dll",
+        "lib/netstandard2.1/ExcelDataReader.pdb",
+        "lib/netstandard2.1/ExcelDataReader.xml"
+      ]
+    },
+    "ExcelDataReader.DataSet/3.9.0": {
+      "sha512": "rOKCpr289dVorML/TK6vdWe8fLeWxFeqlzTYBnbi0Kz0nQ59vlQL4VozI3PcCOUWb8xVpB21g+Wiyp7zZG/OOQ==",
+      "type": "package",
+      "path": "exceldatareader.dataset/3.9.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "ExcelDataReader.png",
+        "README.md",
+        "exceldatareader.dataset.3.9.0.nupkg.sha512",
+        "exceldatareader.dataset.nuspec",
+        "lib/net462/ExcelDataReader.DataSet.dll",
+        "lib/net462/ExcelDataReader.DataSet.pdb",
+        "lib/net462/ExcelDataReader.DataSet.xml",
+        "lib/net8.0/ExcelDataReader.DataSet.dll",
+        "lib/net8.0/ExcelDataReader.DataSet.pdb",
+        "lib/net8.0/ExcelDataReader.DataSet.xml",
+        "lib/netstandard2.0/ExcelDataReader.DataSet.dll",
+        "lib/netstandard2.0/ExcelDataReader.DataSet.pdb",
+        "lib/netstandard2.0/ExcelDataReader.DataSet.xml",
+        "lib/netstandard2.1/ExcelDataReader.DataSet.dll",
+        "lib/netstandard2.1/ExcelDataReader.DataSet.pdb",
+        "lib/netstandard2.1/ExcelDataReader.DataSet.xml"
       ]
     },
     "FluentValidation/12.0.0": {
@@ -3181,6 +3260,8 @@
   },
   "projectFileDependencyGroups": {
     "net10.0": [
+      "ExcelDataReader >= 3.9.0",
+      "ExcelDataReader.DataSet >= 3.9.0",
       "Microsoft.AspNetCore.Identity.EntityFrameworkCore >= 10.0.3",
       "Microsoft.EntityFrameworkCore >= 10.0.3",
       "Microsoft.EntityFrameworkCore.Design >= 10.0.3",
@@ -3191,24 +3272,31 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Samer\\.nuget\\packages\\": {}
+    "C:\\Users\\lyr1csan\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\WorkPlace\\GradProject\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Infrastructure\\SeaLevel.Infrastructure.csproj",
+      "projectUniqueName": "C:\\Users\\lyr1csan\\Desktop\\robotics\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Infrastructure\\SeaLevel.Infrastructure.csproj",
       "projectName": "SeaLevel.Infrastructure",
-      "projectPath": "D:\\WorkPlace\\GradProject\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Infrastructure\\SeaLevel.Infrastructure.csproj",
-      "packagesPath": "C:\\Users\\Samer\\.nuget\\packages\\",
-      "outputPath": "D:\\WorkPlace\\GradProject\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Infrastructure\\obj\\",
+      "projectPath": "C:\\Users\\lyr1csan\\Desktop\\robotics\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Infrastructure\\SeaLevel.Infrastructure.csproj",
+      "packagesPath": "C:\\Users\\lyr1csan\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\lyr1csan\\Desktop\\robotics\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Infrastructure\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\Samer\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\lyr1csan\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -3216,11 +3304,11 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {
-            "D:\\WorkPlace\\GradProject\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Application\\SeaLevel.Application.csproj": {
-              "projectPath": "D:\\WorkPlace\\GradProject\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Application\\SeaLevel.Application.csproj"
+            "C:\\Users\\lyr1csan\\Desktop\\robotics\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Application\\SeaLevel.Application.csproj": {
+              "projectPath": "C:\\Users\\lyr1csan\\Desktop\\robotics\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Application\\SeaLevel.Application.csproj"
             },
-            "D:\\WorkPlace\\GradProject\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Core\\SeaLevel.Core.csproj": {
-              "projectPath": "D:\\WorkPlace\\GradProject\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Core\\SeaLevel.Core.csproj"
+            "C:\\Users\\lyr1csan\\Desktop\\robotics\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Core\\SeaLevel.Core.csproj": {
+              "projectPath": "C:\\Users\\lyr1csan\\Desktop\\robotics\\Alexandria-Sea-Leval-Rise-Mitigation\\Backend\\SeaLevel.Core\\SeaLevel.Core.csproj"
             }
           }
         }
@@ -3242,6 +3330,14 @@
         "framework": "net10.0",
         "targetAlias": "net10.0",
         "dependencies": {
+          "ExcelDataReader": {
+            "target": "Package",
+            "version": "[3.9.0, )"
+          },
+          "ExcelDataReader.DataSet": {
+            "target": "Package",
+            "version": "[3.9.0, )"
+          },
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
             "target": "Package",
             "version": "[10.0.3, )"

@@ -11,11 +11,14 @@ public static class InfrastructureServiceCollectionExtensions
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
     {
         services.AddScoped<IForecastLogRepository, ForecastLogRepository>();
+        services.AddScoped<ILandUseFeatureRepository, LandUseFeatureRepository>();
+        services.AddScoped<ILongTermScenarioRepository, LongTermScenarioRepository>();
 
         services.AddScoped<NasaPowerClient>();
         services.AddScoped<INasaPowerClient, CachedNasaPowerClient>();
 
-        services.AddScoped<IMlForecastClient, MlForecastClient>();
+        services.AddScoped<MlForecastClient>();
+        services.AddScoped<IMlForecastClient, CachedMlForecastClient>();
         services.AddScoped<IChatCompletionClient, GroqChatClient>();
 
         return services;
