@@ -13,6 +13,26 @@ const HomePage = lazy(() => import("./components/HomePage"));
 const ArgentInterventionPage = lazy(() => import("./components/argentIntervention"));
 const AnalyticsPage = lazy(() => import("./components/AnalyticsPage"));
 const FuturePlaningPage = lazy(() => import("./components/futurePlaning"));
+const Login = lazy(() => import("./components/Login"));
+const Register = lazy(() => import("./components/Register"));
+const AdminDashboard = lazy(() => import("./components/AdminDashboard"));
+const UserProfile = lazy(() => import("./components/UserProfile"));
+import { useAuth } from "./contexts/useAuth";
+
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, isAuthReady } = useAuth();
+  if (!isAuthReady) return <PageLoader />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  return children;
+};
+
+const AdminRoute = ({ children }) => {
+  const { isAuthenticated, isAuthReady, user } = useAuth();
+  if (!isAuthReady) return <PageLoader />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!user?.roles?.includes("Admin")) return <Navigate to="/home" replace />;
+  return children;
+};
 
 // Loading Component
 const PageLoader = () => (
@@ -30,10 +50,14 @@ const AppRoutes = () => {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<Navigate to="/home" replace />} />
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/Analytics" element={<AnalyticsPage />} />
-          <Route path="/futurePlaning" element={<FuturePlaningPage />} />
-          <Route path="/argentIntervention" element={<ArgentInterventionPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+          <Route path="/Analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
+          <Route path="/futurePlaning" element={<ProtectedRoute><FuturePlaningPage /></ProtectedRoute>} />
+          <Route path="/argentIntervention" element={<ProtectedRoute><ArgentInterventionPage /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
+          <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
 
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>

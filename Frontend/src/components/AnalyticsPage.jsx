@@ -42,6 +42,22 @@ const AnalyticsPage = () => {
   const [vulnerabilityIndex, setVulnerabilityIndex] = React.useState(null);
   const [vulnerabilityLevel, setVulnerabilityLevel] = React.useState("--");
 
+  const handleExportCsv = async () => {
+    try {
+      const blob = await dataService.exportReportCsv(selectedScenario, selectedYear);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `predictions-data-${selectedScenario}-${selectedYear}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      console.error("Failed to export predictions CSV", error);
+      alert("حدث خطأ أثناء تصدير ملف CSV");
+    }
+  };
+
   useEffect(() => {
     const fetchChartData = async () => {
       try {
@@ -378,7 +394,10 @@ const AnalyticsPage = () => {
                 <h3 className="font-bold text-gray-800">
                   تصنيف الأحياء (تأثر الأقسام)
                 </h3>
-                <button className="text-blue-600 text-xs font-bold hover:underline">
+                <button
+                  onClick={handleExportCsv}
+                  className="text-blue-600 text-xs font-bold hover:underline"
+                >
                   تصدير CSV
                 </button>
               </div>

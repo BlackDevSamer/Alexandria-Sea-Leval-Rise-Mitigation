@@ -36,22 +36,6 @@ public record ProjectionResult(
 
 public static class ProjectionEngine
 {
-    private static readonly Dictionary<int, double> BaseYearDeltas = new()
-    {
-        [2030] = 50.0,
-        [2050] = 120.0,
-        [2070] = 180.0,
-        [2100] = 280.0
-    };
-
-    private static readonly Dictionary<string, double> ScenarioMultipliers = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ["SSP126"] = 1.00,
-        ["SSP245"] = 1.24,
-        ["SSP370"] = 1.47,
-        ["SSP585"] = 1.91
-    };
-
     private static readonly (double AreaThresholdKm2, double DensityPerKm2)[] PopulationZones =
     [
         (5.0, 8_000),
@@ -61,49 +45,10 @@ public static class ProjectionEngine
         (double.MaxValue, 25_000),
     ];
 
-    private static readonly (string Name, double ThresholdMm)[] Zones =
-    [
-        ("المكس", 2250),
-        ("الدخيلة", 2300),
-        ("الأنفوشي", 2450),
-        ("المنشية", 2550),
-        ("أبو قير", 2650),
-        ("المعمورة", 2750),
-        ("الجمرك", 2850),
-        ("محرم بك", 2950),
-        ("المدينة القديمة", 3050),
-        ("معظم المناطق الساحلية", 3150),
-    ];
 
-    private static readonly InfrastructureFacility[] AllFacilities =
-    [
-        new("ميناء الإسكندرية",      "الجمرك",    "ميناء",    2280,
-            "غرق الأرصفة",           31.1956, 29.8841),
-        new("ميناء الدخيلة",         "الدخيلة",   "ميناء",    2300,
-            "تعطل العمليات",          31.1347, 29.8027),
-        new("مستشفى رأس التين",      "الجمرك",    "مستشفى",   2850,
-            "إخلاء كامل",             31.2001, 29.8856),
-        new("مستشفى المعمورة",       "المعمورة",  "مستشفى",   2750,
-            "خطر الفيضان",            31.2687, 30.0632),
-        new("محطة مياه النوزة",      "الجمرك",    "مياه",     2450,
-            "تلوث المياه",            31.1889, 29.9043),
-        new("محطة كهرباء أبو قير",   "أبو قير",   "كهرباء",   2650,
-            "انقطاع الكهرباء",        31.3167, 30.0667),
-        new("مطار برج العرب",        "برج العرب", "مطار",     3100,
-            "تعطل المطار",            30.9177, 29.6964),
-        new("الطريق الساحلي الدولي", "ساحلي",     "طريق",     2350,
-            "قطع الطريق",             31.2156, 29.9512),
-    ];
-
-    public static double GetProjectedSeaLevel(double baselineMm, string scenario, int year)
+    public static double GetProjectedSeaLevel(double baselineMm, double riseInMillimeters)
     {
-        if (!ScenarioMultipliers.TryGetValue(scenario, out double multiplier))
-            throw new ArgumentException($"Unknown scenario: {scenario}");
-
-        if (!BaseYearDeltas.TryGetValue(year, out double baseDelta))
-            throw new ArgumentException($"Unsupported year: {year}");
-
-        return baselineMm + (baseDelta * multiplier);
+        return baselineMm + riseInMillimeters;
     }
 
     private static double CalculateFloodedAreaKm2(double seaLevelMm)
@@ -140,12 +85,12 @@ public static class ProjectionEngine
 
     private static (string Level, string Color, string Description) GetRiskInfo(double seaLevel)
     {
-        if (seaLevel < 2300) return ("منخفض", "#4CAF50", "تأثير محدود");
-        if (seaLevel <= 2500) return ("متوسط", "#FFC107", "خطر متزايد");
-        if (seaLevel <= 2700) return ("مرتفع", "#FF9800", "تهديد للبنية التحتية");
-        if (seaLevel <= 2900) return ("مرتفع جدًا", "#FF5722", "تغلغل المياه");
-        if (seaLevel <= 3100) return ("شديد", "#D32F2F", "غرق مناطق قديمة");
-        return ("كارثي", "#B71C1C", "اختفاء معالم رئيسية");
+        if (seaLevel < 2300) return ("منخفض", "#E3F2FD", "تأثير محدود");
+        if (seaLevel <= 2500) return ("متوسط", "#90CAF9", "خطر متزايد");
+        if (seaLevel <= 2700) return ("مرتفع", "#2196F3", "تهديد للبنية التحتية");
+        if (seaLevel <= 2900) return ("مرتفع جدًا", "#1976D2", "تغلغل المياه");
+        if (seaLevel <= 3100) return ("شديد", "#1565C0", "غرق مناطق قديمة");
+        return ("كارثي", "#0D47A1", "اختفاء معالم رئيسية");
     }
 
     private static string GetInformalSettlementsExposure(double floodedAreaKm2)
@@ -157,45 +102,64 @@ public static class ProjectionEngine
         return "كارثي";
     }
 
-    private static IReadOnlyList<(string Name, double ThresholdMm)> GetUnifiedZones()
-    {
-        var thresholdByZone = new Dictionary<string, double>(StringComparer.Ordinal);
-
-        foreach (var zone in Zones)
-        {
-            thresholdByZone[zone.Name] = zone.ThresholdMm;
-        }
-
-        // Keep population and infrastructure scopes aligned by adding facility districts
-        // and using the most conservative (lowest) threshold when duplicated.
-        foreach (var districtGroup in AllFacilities.GroupBy(f => f.District))
-        {
-            double minFacilityThreshold = districtGroup.Min(f => f.ThresholdMm);
-
-            if (thresholdByZone.TryGetValue(districtGroup.Key, out double existingThreshold))
-            {
-                thresholdByZone[districtGroup.Key] = Math.Min(existingThreshold, minFacilityThreshold);
-                continue;
-            }
-
-            thresholdByZone[districtGroup.Key] = minFacilityThreshold;
-        }
-
-        return thresholdByZone
-            .OrderBy(item => item.Value)
-            .ThenBy(item => item.Key, StringComparer.Ordinal)
-            .Select(item => (Name: item.Key, ThresholdMm: item.Value))
-            .ToList();
-    }
 
     public static ProjectionResult Calculate(double projectedSeaLevel)
+    {
+        return Calculate(projectedSeaLevel, null);
+    }
+
+    public static ProjectionResult Calculate(double projectedSeaLevel, IEnumerable<SeaLevel.Core.Entities.LandUseFeature>? dbFeatures)
     {
         double floodedAreaKm2 = CalculateFloodedAreaKm2(projectedSeaLevel);
         long populationAtRisk = CalculatePopulationAtRisk(floodedAreaKm2);
         var (riskLevel, colorCode, riskDescription) = GetRiskInfo(projectedSeaLevel);
         string informalSettlementsExposure = GetInformalSettlementsExposure(floodedAreaKm2);
 
-        var unifiedZones = GetUnifiedZones();
+        IReadOnlyList<(string Name, double ThresholdMm)> unifiedZones;
+        List<InfrastructureFacility> allFacilities = new();
+
+        if (dbFeatures != null && dbFeatures.Any())
+        {
+            // Map unified zones from database using Province for granular frontend matching
+            // We use the dynamically extracted Province names but map them to calibrated topographic thresholds,
+            // because the geojson point-of-interest elevations (which often include beaches/ports at 0m) 
+            // cause all coastal districts to flood instantly if we use Min or Avg.
+            var thresholdByZone = dbFeatures
+                .Where(f => !string.IsNullOrWhiteSpace(f.Province))
+                .Select(f => f.Province)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(
+                    p => p,
+                    p => GetCalibratedDistrictThreshold(p),
+                    StringComparer.OrdinalIgnoreCase
+                );
+
+            unifiedZones = thresholdByZone
+                .OrderBy(item => item.Value)
+                .ThenBy(item => item.Key, StringComparer.Ordinal)
+                .Select(item => (Name: item.Key, ThresholdMm: item.Value))
+                .ToList();
+
+            // Extract facilities from dbFeatures
+            var facilityKeywords = new[] { "مستشفى", "مستوصف", "ميناء", "مطار", "كهرباء", "مياه", "مدرسة", "كلية", "طريق" };
+            allFacilities = dbFeatures
+                .Where(f => facilityKeywords.Any(k => f.Name.Contains(k) || f.Category.Contains(k)))
+                .Select(f => new InfrastructureFacility(
+                    Name: string.IsNullOrWhiteSpace(f.Name) ? f.Category : f.Name,
+                    District: f.District,
+                    Type: MapCategoryToFrontendType(f.Category, f.Name),
+                    ThresholdMm: f.ThresholdMm,
+                    Impact: "خطر الفيضان", // Generic default impact
+                    Lat: f.Latitude,
+                    Lng: f.Longitude
+                ))
+                .ToList();
+        }
+        else
+        {
+            unifiedZones = new List<(string, double)>();
+        }
+
         var activeZones = unifiedZones
             .Where(z => projectedSeaLevel >= z.ThresholdMm)
             .ToList();
@@ -233,7 +197,6 @@ public static class ProjectionEngine
                 double cumulativeAreaAfterQism = currentTotalArea + qismArea;
                 long qismPop = CalculatePopulationAtRisk(cumulativeAreaAfterQism) - CalculatePopulationAtRisk(currentTotalArea);
 
-                // Use cumulative flooded area for the qism risk band so local breakdown aligns with overall exposure scale.
                 string qismRisk = GetInformalSettlementsExposure(cumulativeAreaAfterQism);
 
                 qisms.Add(new QismResult(zone.Name, qismArea, qismPop, qismRisk));
@@ -241,7 +204,7 @@ public static class ProjectionEngine
             }
         }
 
-        var atRiskFacilities = AllFacilities
+        var atRiskFacilities = allFacilities
             .Where(f => projectedSeaLevel >= f.ThresholdMm)
             .ToList();
 
@@ -257,5 +220,30 @@ public static class ProjectionEngine
             qisms,
             atRiskFacilities
         );
+    }
+
+    private static double GetCalibratedDistrictThreshold(string province)
+    {
+        string pLower = province.Trim().ToLowerInvariant();
+        if (pLower.Contains("مينا البصل")) return 2250; // المكس
+        if (pLower.Contains("الدخيلة")) return 2300;
+        if (pLower.Contains("الجمرك")) return 2450;
+        if (pLower.Contains("المنشية")) return 2550;
+        if (pLower.Contains("المنتزة") || pLower.Contains("المنتزه")) return 2650;
+        if (pLower.Contains("محرم بك")) return 2950;
+        if (pLower.Contains("باب شرقى") || pLower.Contains("باب شرق")) return 3050;
+        if (pLower.Contains("ثان الرمل") || pLower.Contains("سيدى جابر") || pLower.Contains("أول الرمل") || pLower.Contains("العامرية") || pLower.Contains("برج العرب") || pLower.Contains("العطارين") || pLower.Contains("كرموز") || pLower.Contains("اللبان")) return 3150;
+        
+        return 3200; // Default high threshold
+    }
+
+    private static string MapCategoryToFrontendType(string category, string name)
+    {
+        string c = (category ?? "").ToLowerInvariant();
+        string n = (name ?? "").ToLowerInvariant();
+        if (c.Contains("health") || n.Contains("مستشفى") || n.Contains("مستوصف")) return "hospitals";
+        if (c.Contains("port") || n.Contains("ميناء")) return "ports";
+        if (c.Contains("transport") || n.Contains("مطار") || n.Contains("طريق") || n.Contains("قطار") || n.Contains("سكة")) return "transport";
+        return "utilities"; // Default for educational, power, water, etc.
     }
 }

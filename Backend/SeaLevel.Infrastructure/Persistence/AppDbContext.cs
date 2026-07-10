@@ -12,4 +12,6 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     }
 
     public DbSet<ForecastLog> ForecastLogs => Set<ForecastLog>();
+    public DbSet<LandUseFeature> LandUseFeatures => Set<LandUseFeature>();
+    public DbSet<LongTermScenario> LongTermScenarios => Set<LongTermScenario>();
 }

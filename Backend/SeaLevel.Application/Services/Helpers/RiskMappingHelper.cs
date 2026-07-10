@@ -40,13 +40,6 @@ public static class RiskMappingHelper
         return response.Forecast.Max(e => e.PredictedSeaLevel);
     }
 
-    public static double ApplyScenarioAndYearAdjustment(double predictedSeaLevel, string scenario, int year)
-    {
-        ValidateScenario(scenario);
-        ValidateYear(year);
-
-        return ProjectionEngine.GetProjectedSeaLevel(predictedSeaLevel, scenario, year);
-    }
 
     public static string GetRiskLevel(double predictedSeaLevel)
     {
