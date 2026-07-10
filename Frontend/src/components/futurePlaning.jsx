@@ -154,7 +154,7 @@ const getDemStyle = (feature) => {
     color,
     weight: 0,
     fillColor: color,
-    fillOpacity: 0,
+    fillOpacity: 0.2,
     stroke: false,
   };
 };
